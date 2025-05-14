@@ -1,0 +1,118 @@
+[{
+  "routine_name": "editar_carrera",
+  "routine_type": "FUNCTION"
+}, {
+  "routine_name": "editar_cita",
+  "routine_type": "FUNCTION"
+}, {
+  "routine_name": "editar_discapacidad",
+  "routine_type": "FUNCTION"
+}, {
+  "routine_name": "editar_estudiante",
+  "routine_type": "FUNCTION"
+}, {
+  "routine_name": "editar_facultad",
+  "routine_type": "FUNCTION"
+}, {
+  "routine_name": "editar_historial_medico",
+  "routine_type": "FUNCTION"
+}, {
+  "routine_name": "editar_incidencia",
+  "routine_type": "FUNCTION"
+}, {
+  "routine_name": "editar_periodo",
+  "routine_type": "FUNCTION"
+}, {
+  "routine_name": "editar_reporte_psicologico",
+  "routine_type": "FUNCTION"
+}, {
+  "routine_name": "editar_representante",
+  "routine_type": "FUNCTION"
+}, {
+  "routine_name": "editar_universidad",
+  "routine_type": "FUNCTION"
+}, {
+  "routine_name": "editar_usuario",
+  "routine_type": "FUNCTION"
+}, {
+  "routine_name": "eliminar_carrera",
+  "routine_type": "FUNCTION"
+}, {
+  "routine_name": "eliminar_cita",
+  "routine_type": "FUNCTION"
+}, {
+  "routine_name": "eliminar_discapacidad",
+  "routine_type": "FUNCTION"
+}, {
+  "routine_name": "eliminar_estudiante",
+  "routine_type": "FUNCTION"
+}, {
+  "routine_name": "eliminar_facultad",
+  "routine_type": "FUNCTION"
+}, {
+  "routine_name": "eliminar_historial_medico",
+  "routine_type": "FUNCTION"
+}, {
+  "routine_name": "eliminar_incidencia",
+  "routine_type": "FUNCTION"
+}, {
+  "routine_name": "eliminar_periodo",
+  "routine_type": "FUNCTION"
+}, {
+  "routine_name": "eliminar_reporte_psicologico",
+  "routine_type": "FUNCTION"
+}, {
+  "routine_name": "eliminar_representante",
+  "routine_type": "FUNCTION"
+}, {
+  "routine_name": "eliminar_universidad",
+  "routine_type": "FUNCTION"
+}, {
+  "routine_name": "eliminar_usuario",
+  "routine_type": "FUNCTION"
+}, {
+  "routine_name": "insertar_carrera",
+  "routine_type": "FUNCTION"
+}, {
+  "routine_name": "insertar_cita",
+  "routine_type": "FUNCTION"
+}, {
+  "routine_name": "insertar_discapacidad",
+  "routine_type": "FUNCTION"
+}, {
+  "routine_name": "insertar_estudiante",
+  "routine_type": "FUNCTION"
+}, {
+  "routine_name": "insertar_estudiante",
+  "routine_type": "FUNCTION"
+}, {
+  "routine_name": "insertar_facultad",
+  "routine_type": "FUNCTION"
+}, {
+  "routine_name": "insertar_historial_medico",
+  "routine_type": "FUNCTION"
+}, {
+  "routine_name": "insertar_incidencia",
+  "routine_type": "FUNCTION"
+}, {
+  "routine_name": "insertar_periodo",
+  "routine_type": "FUNCTION"
+}, {
+  "routine_name": "insertar_reporte_psicologico",
+  "routine_type": "FUNCTION"
+}, {
+  "routine_name": "insertar_representante",
+  "routine_type": "FUNCTION"
+}, {
+  "routine_name": "insertar_universidad",
+  "routine_type": "FUNCTION"
+}, {
+  "routine_name": "insertar_usuario",
+  "routine_type": "FUNCTION"
+}, {
+  "routine_name": "ver_estudiantes",
+  "routine_type": "FUNCTION"
+}, {
+  "routine_name": "ver_representantes",
+  "routine_type": "FUNCTION"
+}]

@@ -1,0 +1,439 @@
+[{
+  "table_name": "carreras",
+  "column_name": "id_carrera",
+  "data_type": "integer",
+  "is_nullable": "NO",
+  "key_type": "PK"
+}, {
+  "table_name": "carreras",
+  "column_name": "carrera",
+  "data_type": "character varying",
+  "is_nullable": "NO",
+  "key_type": ""
+}, {
+  "table_name": "citas",
+  "column_name": "id_citas",
+  "data_type": "integer",
+  "is_nullable": "NO",
+  "key_type": "PK"
+}, {
+  "table_name": "citas",
+  "column_name": "id_estudiante",
+  "data_type": "integer",
+  "is_nullable": "YES",
+  "key_type": "FK"
+}, {
+  "table_name": "citas",
+  "column_name": "fecha_cita",
+  "data_type": "date",
+  "is_nullable": "NO",
+  "key_type": ""
+}, {
+  "table_name": "citas",
+  "column_name": "motivo_cita",
+  "data_type": "text",
+  "is_nullable": "YES",
+  "key_type": ""
+}, {
+  "table_name": "discapacidades",
+  "column_name": "discapacidad_id",
+  "data_type": "integer",
+  "is_nullable": "NO",
+  "key_type": "PK"
+}, {
+  "table_name": "discapacidades",
+  "column_name": "discapacidad",
+  "data_type": "character varying",
+  "is_nullable": "NO",
+  "key_type": ""
+}, {
+  "table_name": "estudiantes",
+  "column_name": "id_estudiante",
+  "data_type": "integer",
+  "is_nullable": "NO",
+  "key_type": "PK"
+}, {
+  "table_name": "estudiantes",
+  "column_name": "nombres",
+  "data_type": "character varying",
+  "is_nullable": "NO",
+  "key_type": ""
+}, {
+  "table_name": "estudiantes",
+  "column_name": "apellidos",
+  "data_type": "character varying",
+  "is_nullable": "NO",
+  "key_type": ""
+}, {
+  "table_name": "estudiantes",
+  "column_name": "cedula",
+  "data_type": "character varying",
+  "is_nullable": "NO",
+  "key_type": ""
+}, {
+  "table_name": "estudiantes",
+  "column_name": "telefono",
+  "data_type": "character varying",
+  "is_nullable": "YES",
+  "key_type": ""
+}, {
+  "table_name": "estudiantes",
+  "column_name": "correo",
+  "data_type": "character varying",
+  "is_nullable": "YES",
+  "key_type": ""
+}, {
+  "table_name": "estudiantes",
+  "column_name": "discapacidad_id",
+  "data_type": "integer",
+  "is_nullable": "YES",
+  "key_type": "FK"
+}, {
+  "table_name": "estudiantes",
+  "column_name": "fecha_nacimiento",
+  "data_type": "date",
+  "is_nullable": "YES",
+  "key_type": ""
+}, {
+  "table_name": "estudiantes",
+  "column_name": "observaciones",
+  "data_type": "text",
+  "is_nullable": "YES",
+  "key_type": ""
+}, {
+  "table_name": "estudiantes",
+  "column_name": "seguimiento",
+  "data_type": "text",
+  "is_nullable": "YES",
+  "key_type": ""
+}, {
+  "table_name": "estudiantes",
+  "column_name": "fecha_registro",
+  "data_type": "timestamp without time zone",
+  "is_nullable": "YES",
+  "key_type": ""
+}, {
+  "table_name": "facultades",
+  "column_name": "id_facultad",
+  "data_type": "integer",
+  "is_nullable": "NO",
+  "key_type": "PK"
+}, {
+  "table_name": "facultades",
+  "column_name": "facultad",
+  "data_type": "character varying",
+  "is_nullable": "NO",
+  "key_type": ""
+}, {
+  "table_name": "facultades",
+  "column_name": "siglas",
+  "data_type": "character varying",
+  "is_nullable": "NO",
+  "key_type": ""
+}, {
+  "table_name": "historial_medico",
+  "column_name": "id_historialmedico",
+  "data_type": "integer",
+  "is_nullable": "NO",
+  "key_type": "PK"
+}, {
+  "table_name": "historial_medico",
+  "column_name": "id_estudiante",
+  "data_type": "integer",
+  "is_nullable": "YES",
+  "key_type": "FK"
+}, {
+  "table_name": "historial_medico",
+  "column_name": "certificado_conapdis",
+  "data_type": "text",
+  "is_nullable": "YES",
+  "key_type": ""
+}, {
+  "table_name": "historial_medico",
+  "column_name": "informe_medico",
+  "data_type": "text",
+  "is_nullable": "YES",
+  "key_type": ""
+}, {
+  "table_name": "historial_medico",
+  "column_name": "tratamiento",
+  "data_type": "text",
+  "is_nullable": "YES",
+  "key_type": ""
+}, {
+  "table_name": "incidencias",
+  "column_name": "id_incidencia",
+  "data_type": "integer",
+  "is_nullable": "NO",
+  "key_type": "PK"
+}, {
+  "table_name": "incidencias",
+  "column_name": "id_estudiante",
+  "data_type": "integer",
+  "is_nullable": "YES",
+  "key_type": "FK"
+}, {
+  "table_name": "incidencias",
+  "column_name": "hora_incidente",
+  "data_type": "time without time zone",
+  "is_nullable": "NO",
+  "key_type": ""
+}, {
+  "table_name": "incidencias",
+  "column_name": "fecha_incidente",
+  "data_type": "date",
+  "is_nullable": "NO",
+  "key_type": ""
+}, {
+  "table_name": "incidencias",
+  "column_name": "lugar_incidente",
+  "data_type": "character varying",
+  "is_nullable": "NO",
+  "key_type": ""
+}, {
+  "table_name": "incidencias",
+  "column_name": "descripcion_incidente",
+  "data_type": "text",
+  "is_nullable": "YES",
+  "key_type": ""
+}, {
+  "table_name": "incidencias",
+  "column_name": "acuerdos",
+  "data_type": "text",
+  "is_nullable": "YES",
+  "key_type": ""
+}, {
+  "table_name": "incidencias",
+  "column_name": "observaciones",
+  "data_type": "text",
+  "is_nullable": "YES",
+  "key_type": ""
+}, {
+  "table_name": "periodos",
+  "column_name": "id_periodo",
+  "data_type": "integer",
+  "is_nullable": "NO",
+  "key_type": "PK"
+}, {
+  "table_name": "periodos",
+  "column_name": "periodo",
+  "data_type": "character varying",
+  "is_nullable": "NO",
+  "key_type": ""
+}, {
+  "table_name": "reporte_psicologico",
+  "column_name": "id_psicologico",
+  "data_type": "integer",
+  "is_nullable": "NO",
+  "key_type": "PK"
+}, {
+  "table_name": "reporte_psicologico",
+  "column_name": "nombre",
+  "data_type": "character varying",
+  "is_nullable": "NO",
+  "key_type": ""
+}, {
+  "table_name": "reporte_psicologico",
+  "column_name": "apellido",
+  "data_type": "character varying",
+  "is_nullable": "NO",
+  "key_type": ""
+}, {
+  "table_name": "reporte_psicologico",
+  "column_name": "lugar_nacimiento",
+  "data_type": "character varying",
+  "is_nullable": "YES",
+  "key_type": ""
+}, {
+  "table_name": "reporte_psicologico",
+  "column_name": "fecha_nacimiento",
+  "data_type": "date",
+  "is_nullable": "YES",
+  "key_type": ""
+}, {
+  "table_name": "reporte_psicologico",
+  "column_name": "nivel_instruccion",
+  "data_type": "character varying",
+  "is_nullable": "YES",
+  "key_type": ""
+}, {
+  "table_name": "reporte_psicologico",
+  "column_name": "motivo_consulta",
+  "data_type": "text",
+  "is_nullable": "YES",
+  "key_type": ""
+}, {
+  "table_name": "reporte_psicologico",
+  "column_name": "sintesis_diagnostica",
+  "data_type": "text",
+  "is_nullable": "YES",
+  "key_type": ""
+}, {
+  "table_name": "reporte_psicologico",
+  "column_name": "recomendaciones",
+  "data_type": "text",
+  "is_nullable": "YES",
+  "key_type": ""
+}, {
+  "table_name": "reporte_psicologico",
+  "column_name": "id_estudiante",
+  "data_type": "integer",
+  "is_nullable": "YES",
+  "key_type": "FK"
+}, {
+  "table_name": "representantes",
+  "column_name": "id_representante",
+  "data_type": "integer",
+  "is_nullable": "NO",
+  "key_type": "PK"
+}, {
+  "table_name": "representantes",
+  "column_name": "id_estudiante",
+  "data_type": "integer",
+  "is_nullable": "YES",
+  "key_type": "FK"
+}, {
+  "table_name": "representantes",
+  "column_name": "nombre_repre",
+  "data_type": "character varying",
+  "is_nullable": "NO",
+  "key_type": ""
+}, {
+  "table_name": "representantes",
+  "column_name": "parentesco",
+  "data_type": "character varying",
+  "is_nullable": "NO",
+  "key_type": ""
+}, {
+  "table_name": "representantes",
+  "column_name": "cedula_repre",
+  "data_type": "character varying",
+  "is_nullable": "NO",
+  "key_type": ""
+}, {
+  "table_name": "representantes",
+  "column_name": "telefono_repre",
+  "data_type": "character varying",
+  "is_nullable": "YES",
+  "key_type": ""
+}, {
+  "table_name": "representantes",
+  "column_name": "correo_repre",
+  "data_type": "character varying",
+  "is_nullable": "YES",
+  "key_type": ""
+}, {
+  "table_name": "representantes",
+  "column_name": "lugar_nacimiento",
+  "data_type": "character varying",
+  "is_nullable": "YES",
+  "key_type": ""
+}, {
+  "table_name": "representantes",
+  "column_name": "fecha_nacimiento",
+  "data_type": "date",
+  "is_nullable": "YES",
+  "key_type": ""
+}, {
+  "table_name": "representantes",
+  "column_name": "direccion",
+  "data_type": "text",
+  "is_nullable": "YES",
+  "key_type": ""
+}, {
+  "table_name": "representantes",
+  "column_name": "ocupacion",
+  "data_type": "character varying",
+  "is_nullable": "YES",
+  "key_type": ""
+}, {
+  "table_name": "representantes",
+  "column_name": "lugar_trabajo",
+  "data_type": "character varying",
+  "is_nullable": "YES",
+  "key_type": ""
+}, {
+  "table_name": "representantes",
+  "column_name": "estado",
+  "data_type": "character varying",
+  "is_nullable": "YES",
+  "key_type": ""
+}, {
+  "table_name": "representantes",
+  "column_name": "municipio",
+  "data_type": "character varying",
+  "is_nullable": "YES",
+  "key_type": ""
+}, {
+  "table_name": "representantes",
+  "column_name": "departamento",
+  "data_type": "character varying",
+  "is_nullable": "YES",
+  "key_type": ""
+}, {
+  "table_name": "representantes",
+  "column_name": "estado_civil",
+  "data_type": "character varying",
+  "is_nullable": "YES",
+  "key_type": ""
+}, {
+  "table_name": "universidad",
+  "column_name": "id",
+  "data_type": "integer",
+  "is_nullable": "NO",
+  "key_type": "PK"
+}, {
+  "table_name": "universidad",
+  "column_name": "id_estudiante",
+  "data_type": "integer",
+  "is_nullable": "YES",
+  "key_type": "FK"
+}, {
+  "table_name": "universidad",
+  "column_name": "id_carrera",
+  "data_type": "integer",
+  "is_nullable": "YES",
+  "key_type": "FK"
+}, {
+  "table_name": "universidad",
+  "column_name": "id_facultad",
+  "data_type": "integer",
+  "is_nullable": "YES",
+  "key_type": "FK"
+}, {
+  "table_name": "universidad",
+  "column_name": "id_periodo",
+  "data_type": "integer",
+  "is_nullable": "YES",
+  "key_type": "FK"
+}, {
+  "table_name": "usuarios",
+  "column_name": "id_usuario",
+  "data_type": "integer",
+  "is_nullable": "NO",
+  "key_type": "PK"
+}, {
+  "table_name": "usuarios",
+  "column_name": "nombre",
+  "data_type": "character varying",
+  "is_nullable": "NO",
+  "key_type": ""
+}, {
+  "table_name": "usuarios",
+  "column_name": "apellido",
+  "data_type": "character varying",
+  "is_nullable": "NO",
+  "key_type": ""
+}, {
+  "table_name": "usuarios",
+  "column_name": "cedula_usuario",
+  "data_type": "character varying",
+  "is_nullable": "NO",
+  "key_type": ""
+}, {
+  "table_name": "usuarios",
+  "column_name": "password",
+  "data_type": "character varying",
+  "is_nullable": "NO",
+  "key_type": ""
+}]
