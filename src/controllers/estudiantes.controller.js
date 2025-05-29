@@ -5,7 +5,7 @@ import { estudianteValidations } from '../validations/estudiantes.validations.js
 // Función para obtener todos los estudiantes
 export const obtenerEstudiantes = async (req, res) => {
     try {
-        const estudiantes = await req.sql`SELECT * FROM estudiantes`;
+        const estudiantes = await req.sql`SELECT e.id_estudiante, e.nombres, e.apellidos, e.cedula, e.telefono, e.correo ,d.discapacidad, e.fecha_nacimiento, e.observaciones, e.seguimiento, e.fecha_registro FROM estudiantes e LEFT JOIN discapacidades d ON e.discapacidad_id = d.discapacidad_id`;
         res.json(estudiantes);
     } catch (error) {
         console.error('Error al obtener estudiantes:', error);

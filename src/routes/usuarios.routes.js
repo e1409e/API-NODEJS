@@ -6,7 +6,7 @@ import {
     editarUsuario,
     eliminarUsuario
 } from '../controllers/usuarios.controller.js'; // Asegúrate de que la ruta al controlador sea correcta
-import { verificarToken } from '../middleware/authMiddleware.js'; // Si vas a usar middleware de autenticación
+import { verificarToken } from '../middlewares/auth.middleware.js'; // Si vas a usar middleware de autenticación
 
 const router = express.Router();
 
@@ -17,12 +17,12 @@ router.post('/registrar', registrarUsuario);
 router.post('/login', iniciarSesion);
 
 // GET /usuarios - Obtener todos los usuarios (requiere autenticación como ejemplo)
-router.get('/', verificarToken, obtenerTodosLosUsuarios); // Ejemplo de ruta protegida con middleware
+router.get('/', obtenerTodosLosUsuarios); // Ejemplo de ruta protegida con middleware
 
 // PUT /usuarios/:id_usuario - Editar un usuario
-router.put('/:id_usuario', verificarToken, editarUsuario);
+router.put('/:id_usuario', editarUsuario);
 
 // DELETE /usuarios/:id_usuario - Eliminar un usuario
-router.delete('/:id_usuario', verificarToken, eliminarUsuario);
+router.delete('/:id_usuario', eliminarUsuario);
 
 export default router;

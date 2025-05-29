@@ -39,6 +39,8 @@ export const crearCita = async (req, res) => {
 
     try {
         const { id_estudiante, fecha_cita, motivo_cita } = req.body;
+        // Asumiendo que tu función insertar_cita maneja el valor por defecto de 'pendiente'
+        // Si necesitas pasarlo explícitamente, modifica tu función SQL y esta línea.
         const nuevaCita = await sql`
             SELECT insertar_cita(${id_estudiante}, ${fecha_cita}, ${motivo_cita}) as cita;
         `;
@@ -69,7 +71,7 @@ export const actualizarCita = async (req, res) => {
         }
         res.json(citaActualizada[0].cita);
     } catch (error) {
-        console.error("Error al actualizar la cita:", error);
+    console.error("Error al actualizar la cita:", error);
         res.status(500).json({ error: "Error al actualizar la cita" });
     }
 };
@@ -95,5 +97,33 @@ export const eliminarCita = async (req, res) => {
     } catch (error) {
         console.error("Error al eliminar la cita:", error);
         res.status(500).json({ error: "Error al eliminar la cita" });
+    }
+};
+
+
+
+// Función para marcar una cita como realizada (pendiente = 0)
+export const marcarCitaComoRealizada = async (req, res) => {
+    try {
+        const { id_citas } = req.params; // Obtenemos el ID de la cita de los parámetros de la URL
+
+        // Ejecutamos la consulta SQL para actualizar el campo 'pendiente' a 0
+        const result = await sql` UPDATE citas
+            SET pendiente = 0
+            WHERE id_citas = ${id_citas}
+            RETURNING id_citas, pendiente; 
+        `;
+
+        // Verificamos si se actualizó alguna fila
+        if (result.count === 0) {
+            return res.status(404).json({ error: "Cita no encontrada o ya marcada como realizada" });
+        }
+
+        // Devolvemos una respuesta de éxito
+        res.json({ message: "Cita marcada como realizada correctamente", cita: result[0] });
+
+    } catch (error) {
+        console.error("Error al marcar la cita como realizada:", error);
+        res.status(500).json({ error: "Error al marcar la cita como realizada" });
     }
 };
