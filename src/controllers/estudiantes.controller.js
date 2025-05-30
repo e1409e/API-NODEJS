@@ -1,11 +1,29 @@
 import { validationResult } from 'express-validator';
-import { sql } from '../db.js'; //  Asegúrate de que la ruta a tu conexión a la base de datos es correcta
+import { sql } from '../db.js'; // Asegúrate de que la ruta a tu conexión a la base de datos es correcta
 import { estudianteValidations } from '../validations/estudiantes.validations.js';
 
 // Función para obtener todos los estudiantes
 export const obtenerEstudiantes = async (req, res) => {
     try {
-        const estudiantes = await req.sql`SELECT e.id_estudiante, e.nombres, e.apellidos, e.cedula, e.telefono, e.correo ,d.discapacidad, e.fecha_nacimiento, e.observaciones, e.seguimiento, e.fecha_registro FROM estudiantes e LEFT JOIN discapacidades d ON e.discapacidad_id = d.discapacidad_id`;
+        // CORREGIDO: Añadir LEFT JOIN para obtener el nombre de la discapacidad
+        const estudiantes = await req.sql`
+            SELECT 
+                e.id_estudiante, 
+                e.nombres, 
+                e.apellidos, 
+                e.cedula, 
+                e.telefono, 
+                e.correo, 
+                e.direccion, -- Asegúrate de que este campo está en la tabla
+                e.discapacidad_id, 
+                d.discapacidad, -- Este es el nombre de la discapacidad desde la tabla 'discapacidades'
+                e.fecha_nacimiento, 
+                e.observaciones, 
+                e.seguimiento, 
+                e.fecha_registro 
+            FROM estudiantes e 
+            LEFT JOIN discapacidades d ON e.discapacidad_id = d.discapacidad_id
+        `;
         res.json(estudiantes);
     } catch (error) {
         console.error('Error al obtener estudiantes:', error);
@@ -17,8 +35,25 @@ export const obtenerEstudiantes = async (req, res) => {
 export const obtenerEstudiantePorId = async (req, res) => {
     try {
         const { id_estudiante } = req.params;
+        // CORREGIDO: Añadir LEFT JOIN para obtener el nombre de la discapacidad
         const estudiante = await req.sql`
-            SELECT * FROM estudiantes WHERE id_estudiante = ${id_estudiante}
+            SELECT 
+                e.id_estudiante, 
+                e.nombres, 
+                e.apellidos, 
+                e.cedula, 
+                e.telefono, 
+                e.correo, 
+                e.direccion, -- Asegúrate de que este campo está en la tabla
+                e.discapacidad_id, 
+                d.discapacidad, -- Este es el nombre de la discapacidad desde la tabla 'discapacidades'
+                e.fecha_nacimiento, 
+                e.observaciones, 
+                e.seguimiento, 
+                e.fecha_registro 
+            FROM estudiantes e 
+            LEFT JOIN discapacidades d ON e.discapacidad_id = d.discapacidad_id
+            WHERE e.id_estudiante = ${id_estudiante}
         `;
 
         if (estudiante.length === 0) {
@@ -31,8 +66,6 @@ export const obtenerEstudiantePorId = async (req, res) => {
         res.status(500).json({ error: 'Error al obtener estudiante por ID' });
     }
 };
-
-
 
 // Función para crear un nuevo estudiante
 export const crearEstudiante = async (req, res) => {
@@ -51,20 +84,20 @@ export const crearEstudiante = async (req, res) => {
             cedula,
             telefono,
             correo,
+            direccion, // Campo nuevo
             discapacidad_id,
             fecha_nacimiento,
             observaciones,
             seguimiento
         } = req.body;
 
-        // Verificar que la conexión SQL está correctamente definida
         if (!req.sql) {
             throw new Error("No se encontró la conexión SQL en req.sql");
         }
 
-        // Ejecutar la consulta SQL
+        // CORREGIDO: Usar el nombre de la función SQL correcta 'insertar_estudiante'
         const nuevoEstudiante = await req.sql`
-            SELECT guardar_estudiantes(
+            SELECT insertar_estudiante(
                 ${nombres},
                 ${apellidos},
                 ${cedula},
@@ -73,16 +106,39 @@ export const crearEstudiante = async (req, res) => {
                 ${discapacidad_id},
                 ${fecha_nacimiento}::date,
                 ${observaciones},
-                ${seguimiento}
-            ) as estudiante;
+                ${seguimiento},
+                ${direccion} -- Pasar el campo direccion
+            ) as id_estudiante; -- La función devuelve el ID directamente
         `;
 
-        // Verificar que se haya retornado un estudiante válido
-        if (!nuevoEstudiante.length || !nuevoEstudiante[0].estudiante) {
-            throw new Error("Error al guardar el estudiante en la base de datos");
+        if (!nuevoEstudiante.length || nuevoEstudiante[0].id_estudiante === null) {
+            throw new Error("Error al guardar el estudiante en la base de datos o ID no retornado");
         }
 
-        res.status(201).json(nuevoEstudiante[0].estudiante);
+        // Si la función SQL devuelve directamente el ID, la respuesta será solo el ID.
+        // Tu frontend espera un objeto Estudiante, por lo que puedes construirlo aquí
+        // o ajustarlo en el frontend. Para que Flutter lo reciba como un Estudiante:
+        const responseData = {
+            id_estudiante: nuevoEstudiante[0].id_estudiante,
+            nombres,
+            apellidos,
+            cedula,
+            telefono,
+            correo,
+            direccion, // Incluir para que el frontend lo tenga
+            discapacidad_id,
+            fecha_nacimiento,
+            observaciones,
+            seguimiento,
+            // Asumiendo que fecha_registro y fecha_actualizacion son generadas por la DB
+            fecha_registro: new Date().toISOString(), 
+            fecha_actualizacion: new Date().toISOString(),
+            // Y el nombre de la discapacidad si lo necesitas inmediatamente
+            discapacidad: null // O podrías buscarlo si es crítico para la respuesta
+        };
+
+        res.status(201).json(responseData); // Devolvemos el objeto que Flutter espera
+
     } catch (error) {
         console.error("Error al crear estudiante:", error.message);
         res.status(500).json({ error: error.message || "Error interno del servidor" });
@@ -106,13 +162,19 @@ export const editarEstudiante = async (req, res) => {
             cedula,
             telefono,
             correo,
+            direccion, // Campo nuevo
             discapacidad_id,
             fecha_nacimiento,
             observaciones,
             seguimiento,
-            
         } = req.body;
 
+        // CORREGIDO: Asegurarse de que fecha_nacimiento se pasa como DATE si tu función lo espera así
+        // Si fecha_nacimiento es un string, el backend de postgres lo convierte con ::date
+        // pero si ya es un objeto Date en JS, puede que necesites formatearlo si el driver SQL lo requiere.
+        // Aquí lo pasamos directamente, asumiendo que el driver lo maneja.
+
+        // CORREGIDO: El nombre del campo que retorna tu función SQL es 'editar_estudiante' (boolean)
         const estudianteEditado = await req.sql`
             SELECT editar_estudiante(
                 ${id_estudiante},
@@ -122,17 +184,21 @@ export const editarEstudiante = async (req, res) => {
                 ${telefono},
                 ${correo},
                 ${discapacidad_id},
-                ${fecha_nacimiento},
+                ${fecha_nacimiento}, -- Asegúrate de que el tipo de dato sea compatible con DATE en SQL
                 ${observaciones},
-                ${seguimiento}
-            )
+                ${seguimiento},
+                ${direccion} -- Pasar el campo direccion
+            ) as editar_estudiante; -- <-- Nombre del alias para el valor de retorno
         `;
 
-        if (estudianteEditado.length === 0) {
-            return res.status(404).json({ error: 'Estudiante no encontrado' });
+        if (estudianteEditado.length === 0 || estudianteEditado[0].editar_estudiante === false) {
+            return res.status(404).json({ error: 'Estudiante no encontrado o no se pudo actualizar' });
         }
 
-        res.json(estudianteEditado[0]); //  Devuelve el estudiante editado
+        // Si la función SQL devuelve un booleano `true` al editar,
+        // devolvemos el formato que tu frontend espera para la actualización exitosa:
+        res.json({ editar_estudiante: true }); 
+
     } catch (error) {
         console.error('Error al editar estudiante:', error);
         res.status(500).json({ error: 'Error al editar estudiante' });

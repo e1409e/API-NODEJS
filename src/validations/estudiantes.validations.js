@@ -12,6 +12,7 @@ export const estudianteValidations = {
         body('observaciones').optional(),
         body('seguimiento').optional(),
         body('fecha_registro').optional().isISO8601().toDate().withMessage('La fecha de registro debe ser una fecha válida'),
+        body('direccion').optional().isString(),
     ],
     editarEstudianteValidations: [
         param('id_estudiante').isInt().withMessage('El ID del estudiante debe ser un entero'),
@@ -25,5 +26,6 @@ export const estudianteValidations = {
         body('observaciones').optional(),
         body('seguimiento').optional(),
         body('fecha_registro').optional().isISO8601().toDate().withMessage('La fecha de registro debe ser una fecha válida'),
+        body('direccion').optional().isString(),
     ],
 };
