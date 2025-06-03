@@ -15,6 +15,7 @@ import reportePsicologicoRoutes from './routes/reporte_psicologico.routes.js';
 import incidenciasRoutes from './routes/incidencias.routes.js';
 import usuariosRoutes from './routes/usuarios.routes.js';
 import universidadRoutes from './routes/universidad.routes.js';
+import carrerasRoutes from './routes/carreras.routes.js';
 
 dotenv.config();
 
@@ -44,6 +45,7 @@ app.use('/reporte-psicologico', reportePsicologicoRoutes);
 app.use('/incidencias', incidenciasRoutes);
 app.use('/usuarios', usuariosRoutes); // Aquí es donde se montan tus rutas de usuarios, incluyendo /usuarios/login
 app.use('/universidad', universidadRoutes);
+app.use('/carreras', carrerasRoutes);
 
 app.get('/api/version', async (req, res) => {
     try {

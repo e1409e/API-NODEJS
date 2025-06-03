@@ -105,7 +105,7 @@ export const editarUsuario = async (req, res) => {
                 ${apellido},
                 ${cedula_usuario},
                 ${password},
-                ${rol} -- <-- ¡Añadir 'rol' aquí!
+                ${rol}
             )
         `;
 

@@ -5,24 +5,19 @@ import { estudianteValidations } from '../validations/estudiantes.validations.js
 // Función para obtener todos los estudiantes
 export const obtenerEstudiantes = async (req, res) => {
     try {
-        // CORREGIDO: Añadir LEFT JOIN para obtener el nombre de la discapacidad
+        
         const estudiantes = await req.sql`
             SELECT 
-                e.id_estudiante, 
-                e.nombres, 
-                e.apellidos, 
-                e.cedula, 
-                e.telefono, 
-                e.correo, 
-                e.direccion, -- Asegúrate de que este campo está en la tabla
-                e.discapacidad_id, 
-                d.discapacidad, -- Este es el nombre de la discapacidad desde la tabla 'discapacidades'
-                e.fecha_nacimiento, 
-                e.observaciones, 
-                e.seguimiento, 
-                e.fecha_registro 
+                e.*, 
+                d.discapacidad,
+                r.nombre_repre,
+                f.facultad, f.siglas,
+                ca.carrera
             FROM estudiantes e 
             LEFT JOIN discapacidades d ON e.discapacidad_id = d.discapacidad_id
+            LEFT JOIN representantes r ON r.id_estudiante = e.id_estudiante
+            LEFT JOIN carreras ca ON e.id_carrera = ca.id_carrera
+            LEFT JOIN facultades f ON f.id_facultad = ca.id_facultad
         `;
         res.json(estudiantes);
     } catch (error) {
@@ -38,21 +33,16 @@ export const obtenerEstudiantePorId = async (req, res) => {
         // CORREGIDO: Añadir LEFT JOIN para obtener el nombre de la discapacidad
         const estudiante = await req.sql`
             SELECT 
-                e.id_estudiante, 
-                e.nombres, 
-                e.apellidos, 
-                e.cedula, 
-                e.telefono, 
-                e.correo, 
-                e.direccion, -- Asegúrate de que este campo está en la tabla
-                e.discapacidad_id, 
-                d.discapacidad, -- Este es el nombre de la discapacidad desde la tabla 'discapacidades'
-                e.fecha_nacimiento, 
-                e.observaciones, 
-                e.seguimiento, 
-                e.fecha_registro 
+                e.*, 
+                d.discapacidad,
+                r.nombre_repre,
+                f.facultad, f.siglas,
+                ca.carrera
             FROM estudiantes e 
             LEFT JOIN discapacidades d ON e.discapacidad_id = d.discapacidad_id
+            LEFT JOIN representantes r ON r.id_estudiante = e.id_estudiante
+            LEFT JOIN carreras ca ON e.id_carrera = ca.id_carrera
+            LEFT JOIN facultades f ON f.id_facultad = ca.id_facultad
             WHERE e.id_estudiante = ${id_estudiante}
         `;
 
@@ -66,6 +56,7 @@ export const obtenerEstudiantePorId = async (req, res) => {
         res.status(500).json({ error: 'Error al obtener estudiante por ID' });
     }
 };
+
 
 // Función para crear un nuevo estudiante
 export const crearEstudiante = async (req, res) => {
@@ -107,8 +98,8 @@ export const crearEstudiante = async (req, res) => {
                 ${fecha_nacimiento}::date,
                 ${observaciones},
                 ${seguimiento},
-                ${direccion} -- Pasar el campo direccion
-            ) as id_estudiante; -- La función devuelve el ID directamente
+                ${direccion}
+            ) as id_estudiante; 
         `;
 
         if (!nuevoEstudiante.length || nuevoEstudiante[0].id_estudiante === null) {
@@ -184,11 +175,11 @@ export const editarEstudiante = async (req, res) => {
                 ${telefono},
                 ${correo},
                 ${discapacidad_id},
-                ${fecha_nacimiento}, -- Asegúrate de que el tipo de dato sea compatible con DATE en SQL
+                ${fecha_nacimiento}, 
                 ${observaciones},
                 ${seguimiento},
-                ${direccion} -- Pasar el campo direccion
-            ) as editar_estudiante; -- <-- Nombre del alias para el valor de retorno
+                ${direccion}
+            ) as editar_estudiante; 
         `;
 
         if (estudianteEditado.length === 0 || estudianteEditado[0].editar_estudiante === false) {
