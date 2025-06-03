@@ -1,6 +1,6 @@
 import { validationResult } from 'express-validator';
 import { sql } from '../db.js'; // Asegúrate de que la ruta a tu conexión a la base de datos es correcta
-import { estudianteValidations } from '../validations/estudiantes.validations.js';
+import { estudianteValidations } from '../validations/estudiantes.validations.js'; // Asumo que estas validaciones también se actualizarán
 
 // Función para obtener todos los estudiantes
 export const obtenerEstudiantes = async (req, res) => {
@@ -61,6 +61,7 @@ export const obtenerEstudiantePorId = async (req, res) => {
 // Función para crear un nuevo estudiante
 export const crearEstudiante = async (req, res) => {
     // Validaciones
+    // Asegúrate de que estudianteValidations.crearEstudianteValidations esté actualizado para los nuevos campos
     await Promise.all(estudianteValidations.crearEstudianteValidations.map(validation => validation.run(req)));
 
     const errors = validationResult(req);
@@ -75,18 +76,20 @@ export const crearEstudiante = async (req, res) => {
             cedula,
             telefono,
             correo,
-            direccion, // Campo nuevo
+            direccion,
             discapacidad_id,
             fecha_nacimiento,
             observaciones,
-            seguimiento
+            seguimiento,
+            id_carrera, 
+            posee_conapdis, 
+            otro_telefono 
         } = req.body;
 
         if (!req.sql) {
             throw new Error("No se encontró la conexión SQL en req.sql");
         }
 
-        // CORREGIDO: Usar el nombre de la función SQL correcta 'insertar_estudiante'
         const nuevoEstudiante = await req.sql`
             SELECT insertar_estudiante(
                 ${nombres},
@@ -98,7 +101,10 @@ export const crearEstudiante = async (req, res) => {
                 ${fecha_nacimiento}::date,
                 ${observaciones},
                 ${seguimiento},
-                ${direccion}
+                ${direccion},
+                ${id_carrera},
+                ${posee_conapdis},
+                ${otro_telefono}
             ) as id_estudiante; 
         `;
 
@@ -106,9 +112,29 @@ export const crearEstudiante = async (req, res) => {
             throw new Error("Error al guardar el estudiante en la base de datos o ID no retornado");
         }
 
-        // Si la función SQL devuelve directamente el ID, la respuesta será solo el ID.
-        // Tu frontend espera un objeto Estudiante, por lo que puedes construirlo aquí
-        // o ajustarlo en el frontend. Para que Flutter lo reciba como un Estudiante:
+        // Recuperar el nombre de la discapacidad, facultad y carrera si es crítico para la respuesta inmediata
+        let discapacidadNombre = null;
+        if (discapacidad_id) {
+            const disc = await req.sql`SELECT discapacidad FROM discapacidades WHERE discapacidad_id = ${discapacidad_id}`;
+            if (disc.length > 0) discapacidadNombre = disc[0].discapacidad;
+        }
+
+        let facultadData = { facultad: null, siglas: null };
+        let carreraNombre = null;
+        if (id_carrera) {
+            const carr = await req.sql`SELECT carrera, id_facultad FROM carreras WHERE id_carrera = ${id_carrera}`;
+            if (carr.length > 0) {
+                carreraNombre = carr[0].carrera;
+                if (carr[0].id_facultad) {
+                    const fac = await req.sql`SELECT facultad, siglas FROM facultades WHERE id_facultad = ${carr[0].id_facultad}`;
+                    if (fac.length > 0) {
+                        facultadData = { facultad: fac[0].facultad, siglas: fac[0].siglas };
+                    }
+                }
+            }
+        }
+
+
         const responseData = {
             id_estudiante: nuevoEstudiante[0].id_estudiante,
             nombres,
@@ -116,19 +142,24 @@ export const crearEstudiante = async (req, res) => {
             cedula,
             telefono,
             correo,
-            direccion, // Incluir para que el frontend lo tenga
+            direccion,
             discapacidad_id,
-            fecha_nacimiento,
+            fecha_nacimiento: new Date(fecha_nacimiento).toISOString(), // Asegurarse de que el formato sea ISO
             observaciones,
             seguimiento,
-            // Asumiendo que fecha_registro y fecha_actualizacion son generadas por la DB
             fecha_registro: new Date().toISOString(), 
             fecha_actualizacion: new Date().toISOString(),
-            // Y el nombre de la discapacidad si lo necesitas inmediatamente
-            discapacidad: null // O podrías buscarlo si es crítico para la respuesta
+            id_carrera: id_carrera,
+            posee_conapdis: posee_conapdis,
+            otro_telefono: otro_telefono,
+            discapacidad: discapacidadNombre, // Incluir el nombre de la discapacidad
+            nombre_repre: null, // Asumimos que no hay representante al crear, o se manejaría en otro endpoint
+            facultad: facultadData.facultad,
+            siglas: facultadData.siglas,
+            carrera: carreraNombre
         };
 
-        res.status(201).json(responseData); // Devolvemos el objeto que Flutter espera
+        res.status(201).json(responseData); 
 
     } catch (error) {
         console.error("Error al crear estudiante:", error.message);
@@ -138,6 +169,7 @@ export const crearEstudiante = async (req, res) => {
 
 // Función para editar un estudiante existente
 export const editarEstudiante = async (req, res) => {
+    // Asegúrate de que estudianteValidations.editarEstudianteValidations esté actualizado para los nuevos campos
     await Promise.all(estudianteValidations.editarEstudianteValidations.map(validation => validation.run(req)));
 
     const errors = validationResult(req);
@@ -153,19 +185,16 @@ export const editarEstudiante = async (req, res) => {
             cedula,
             telefono,
             correo,
-            direccion, // Campo nuevo
+            direccion,
             discapacidad_id,
             fecha_nacimiento,
             observaciones,
             seguimiento,
+            id_carrera, 
+            posee_conapdis, 
+            otro_telefono
         } = req.body;
 
-        // CORREGIDO: Asegurarse de que fecha_nacimiento se pasa como DATE si tu función lo espera así
-        // Si fecha_nacimiento es un string, el backend de postgres lo convierte con ::date
-        // pero si ya es un objeto Date en JS, puede que necesites formatearlo si el driver SQL lo requiere.
-        // Aquí lo pasamos directamente, asumiendo que el driver lo maneja.
-
-        // CORREGIDO: El nombre del campo que retorna tu función SQL es 'editar_estudiante' (boolean)
         const estudianteEditado = await req.sql`
             SELECT editar_estudiante(
                 ${id_estudiante},
@@ -178,7 +207,10 @@ export const editarEstudiante = async (req, res) => {
                 ${fecha_nacimiento}, 
                 ${observaciones},
                 ${seguimiento},
-                ${direccion}
+                ${direccion},
+                ${id_carrera},
+                ${posee_conapdis},
+                ${otro_telefono}
             ) as editar_estudiante; 
         `;
 
@@ -186,8 +218,10 @@ export const editarEstudiante = async (req, res) => {
             return res.status(404).json({ error: 'Estudiante no encontrado o no se pudo actualizar' });
         }
 
-        // Si la función SQL devuelve un booleano `true` al editar,
-        // devolvemos el formato que tu frontend espera para la actualización exitosa:
+        // Opcional: Si quieres devolver el objeto completo actualizado como en crearEstudiante,
+        // tendrías que volver a hacer un SELECT * FROM estudiantes WHERE id_estudiante = ${id_estudiante}
+        // o construir el objeto con los datos enviados en el body.
+        // Por ahora, devolvemos solo el indicador de éxito.
         res.json({ editar_estudiante: true }); 
 
     } catch (error) {
