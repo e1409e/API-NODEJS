@@ -74,3 +74,23 @@ export const eliminarFacultad = async (req, res) => {
         res.status(500).json({ error: 'Error al eliminar facultad' });
     }
 };
+
+export const obtenerFacultadesConCarreras = async (req, res) => {
+  try {
+    // Obtén todas las facultades
+    const facultades = await sql`SELECT * FROM facultades`;
+
+    // Obtén todas las carreras
+    const carreras = await sql`SELECT * FROM carreras`;
+
+    // Asocia carreras a cada facultad
+    const resultado = facultades.map(facultad => ({
+      ...facultad,
+      carreras: carreras.filter(c => c.id_facultad === facultad.id_facultad)
+    }));
+
+    res.json(resultado);
+  } catch (error) {
+    res.status(500).json({ error: "Error al obtener facultades con carreras" });
+  }
+};

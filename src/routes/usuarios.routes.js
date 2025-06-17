@@ -4,7 +4,8 @@ import {
     iniciarSesion,
     obtenerTodosLosUsuarios,
     editarUsuario,
-    eliminarUsuario
+    eliminarUsuario,
+    obtenerPasswordUsuario
 } from '../controllers/usuarios.controller.js'; // Asegúrate de que la ruta al controlador sea correcta
 import { verificarToken } from '../middlewares/auth.middleware.js'; // Si vas a usar middleware de autenticación
 
@@ -24,5 +25,7 @@ router.put('/:id_usuario', editarUsuario);
 
 // DELETE /usuarios/:id_usuario - Eliminar un usuario
 router.delete('/:id_usuario', eliminarUsuario);
+// GET /usuarios/:id_usuario/password - Obtener la contraseña de un usuario
+router.get('/:id_usuario/password', obtenerPasswordUsuario);
 
 export default router;

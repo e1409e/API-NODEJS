@@ -53,7 +53,7 @@ export const iniciarSesion = async (req, res) => {
             message: 'Inicio de sesión exitoso',
             success: true,
             rol: usuarioLogueado.rol,
-            id_usuario: usuarioLogueado.id_usuario, // <--- AGREGA ESTA LÍNEA
+            id_usuario: usuarioLogueado.id_usuario, 
             // cedula_usuario: usuarioLogueado.cedula_usuario, // opcional
         });
     } catch (error) {
@@ -61,6 +61,28 @@ export const iniciarSesion = async (req, res) => {
         res.status(500).json({ error: 'Error al iniciar sesión', success: false });
     }
 };
+
+// Obtener la contraseña de un usuario (solo para administradores autenticados)
+export const obtenerPasswordUsuario = async (req, res) => {
+  try {
+    const { id_usuario } = req.params;
+    // Aquí deberías validar que el usuario autenticado es administrador
+    // y que está autorizado para ver la contraseña de otros usuarios
+
+    const usuario = await sql`
+      SELECT password FROM usuarios WHERE id_usuario = ${id_usuario}
+    `;
+    if (usuario.length === 0) {
+      return res.status(404).json({ error: "Usuario no encontrado" });
+    }
+    res.json({ password: usuario[0].password });
+  } catch (error) {
+    console.error("Error al obtener contraseña:", error);
+    res.status(500).json({ error: "Error al obtener contraseña" });
+  }
+};
+
+
 
 // Obtener todos los usuarios
 export const obtenerTodosLosUsuarios = async (req, res) => {
