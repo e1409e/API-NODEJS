@@ -52,11 +52,9 @@ export const iniciarSesion = async (req, res) => {
         res.json({
             message: 'Inicio de sesión exitoso',
             success: true,
-            // ¡Incluir el rol en la respuesta!
             rol: usuarioLogueado.rol,
-            // Opcional: Podrías devolver también el id_usuario si lo necesitas en el frontend para algo
-            // id_usuario: usuarioLogueado.id_usuario,
-            // cedula_usuario: usuarioLogueado.cedula_usuario,
+            id_usuario: usuarioLogueado.id_usuario, // <--- AGREGA ESTA LÍNEA
+            // cedula_usuario: usuarioLogueado.cedula_usuario, // opcional
         });
     } catch (error) {
         console.error('Error al iniciar sesión:', error);

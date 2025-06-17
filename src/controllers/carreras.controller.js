@@ -1,13 +1,11 @@
 import { validationResult } from 'express-validator';
-import { sql } from '../db.js'; // Asegúrate de que la ruta a tu conexión a la base de datos es correcta
+import { sql } from '../db.js';
 import { carrerasValidations } from '../validations/carreras.validations.js';
 
-// Función para obtener todas las carreras
+// Obtener todas las carreras
 export const obtenerCarreras = async (req, res) => {
     try {
-        const carreras = await req.sql`
-            SELECT  ca.* FROM carreras ca 
-        `;
+        const carreras = await sql`SELECT c.*, f.facultad FROM carreras c JOIN facultades f ON c.id_facultad = f.id_facultad`;
         res.json(carreras);
     } catch (error) {
         console.error('Error al obtener las carreras:', error);
@@ -15,23 +13,76 @@ export const obtenerCarreras = async (req, res) => {
     }
 };
 
-// Función para obtener carreras por ID
+// Obtener una carrera por ID
 export const obtenerCarreraPorId = async (req, res) => {
     try {
         const { id_carrera } = req.params;
-        const carrera = await req.sql`
-            SELECT  ca.* FROM carreras ca
-            WHERE ca.id_carrera = ${id_carrera}
-        `;
-
+        const carrera = await sql`SELECT c.*, f.facultad FROM carreras c JOIN facultades f ON c.id_facultad = f.id_facultad WHERE id_carrera = ${id_carrera}`;
         if (carrera.length === 0) {
             return res.status(404).json({ error: 'Carrera no encontrada' });
         }
-
         res.json(carrera[0]);
     } catch (error) {
         console.error('Error al obtener carrera por ID:', error);
         res.status(500).json({ error: 'Error al obtener carrera por ID' });
+    }
+};
+
+// Crear una nueva carrera
+export const crearCarrera = async (req, res) => {
+    await Promise.all(carrerasValidations.crearCarreraValidations.map(validation => validation.run(req)));
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+    }
+    try {
+        const { carrera, id_facultad } = req.body;
+        const result = await sql`SELECT insertar_carrera(${carrera}, ${id_facultad}) AS id_carrera`;
+        res.status(201).json({ id_carrera: result[0].id_carrera, message: 'Carrera creada correctamente' });
+    } catch (error) {
+        console.error('Error al crear carrera:', error);
+        res.status(500).json({ error: 'Error al crear carrera' });
+    }
+};
+
+// Editar una carrera existente
+export const editarCarrera = async (req, res) => {
+    await Promise.all(carrerasValidations.editarCarreraValidations.map(validation => validation.run(req)));
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+    }
+    try {
+        const { id_carrera } = req.params;
+        const { carrera, id_facultad } = req.body;
+        const result = await sql`SELECT editar_carrera(${id_carrera}, ${carrera || null}, ${id_facultad || null}) AS success`;
+        if (!result[0].success) {
+            return res.status(404).json({ error: 'Carrera no encontrada o no se pudo actualizar' });
+        }
+        res.json({ message: 'Carrera actualizada correctamente' });
+    } catch (error) {
+        console.error('Error al editar carrera:', error);
+        res.status(500).json({ error: 'Error al editar carrera' });
+    }
+};
+
+// Eliminar una carrera
+export const eliminarCarrera = async (req, res) => {
+    await Promise.all(carrerasValidations.eliminarCarreraValidations.map(validation => validation.run(req)));
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+    }
+    try {
+        const { id_carrera } = req.params;
+        const result = await sql`SELECT eliminar_carrera(${id_carrera}) AS success`;
+        if (!result[0].success) {
+            return res.status(404).json({ error: 'Carrera no encontrada o no se pudo eliminar' });
+        }
+        res.json({ message: 'Carrera eliminada correctamente' });
+    } catch (error) {
+        console.error('Error al eliminar carrera:', error);
+        res.status(500).json({ error: 'Error al eliminar carrera' });
     }
 };
 

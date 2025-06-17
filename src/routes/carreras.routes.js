@@ -1,15 +1,27 @@
 import express from 'express';
 import {
     obtenerCarreras,
-    obtenerCarreraPorId, 
+    obtenerCarreraPorId,
+    crearCarrera,
+    editarCarrera,
+    eliminarCarrera
 } from '../controllers/carreras.controller.js';
 
 const router = express.Router();
 
+// Obtener todas las carreras
 router.get('/', obtenerCarreras);
-router.get('/:id_carrera', obtenerCarreraPorId); //  Añadida la nueva ruta
-// router.post('/', crearCarrera);
-// router.put('/:id_estudiante', editarCarrera);
-// router.delete('/:id_estudiante', eliminarCarrera);
+
+// Obtener una carrera por ID
+router.get('/:id_carrera', obtenerCarreraPorId);
+
+// Crear una nueva carrera (requiere: carrera, id_facultad)
+router.post('/', crearCarrera);
+
+// Editar una carrera (puede recibir: carrera, id_facultad)
+router.put('/:id_carrera', editarCarrera);
+
+// Eliminar una carrera
+router.delete('/:id_carrera', eliminarCarrera);
 
 export default router;
