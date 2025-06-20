@@ -40,7 +40,7 @@ app.use((req, res, next) => {
 app.use('/citas', citasRoutes);
 app.use('/representantes', representantesRoutes);
 app.use('/estudiantes', estudiantesRoutes);
-app.use('/HistorialMedico', historialMedicoRoutes);
+app.use('/historial_medico', historialMedicoRoutes);
 app.use('/discapacidades', discapacidadesRoutes);
 app.use('/reporte-psicologico', reportePsicologicoRoutes);
 app.use('/incidencias', incidenciasRoutes);

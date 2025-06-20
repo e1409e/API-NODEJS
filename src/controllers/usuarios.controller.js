@@ -95,6 +95,7 @@ export const obtenerTodosLosUsuarios = async (req, res) => {
   }
 };
 
+
 // Editar un usuario
 export const editarUsuario = async (req, res) => {
     try {
@@ -159,5 +160,41 @@ export const eliminarUsuario = async (req, res) => {
   } catch (error) {
     console.error("Error al eliminar usuario:", error);
     res.status(500).json({ error: "Error al eliminar usuario" });
+  }
+};
+
+// Obtener un usuario por ID
+export const obtenerUsuarioPorId = async (req, res) => {
+  try {
+    const { id_usuario } = req.params;
+    const usuario = await sql`
+      SELECT id_usuario, nombre, apellido, cedula_usuario, rol
+      FROM usuarios
+      WHERE id_usuario = ${id_usuario}
+    `;
+    if (usuario.length === 0) {
+      return res.status(404).json({ error: "Usuario no encontrado" });
+    }
+    res.json(usuario[0]);
+  } catch (error) {
+    console.error("Error al obtener usuario por ID:", error);
+    res.status(500).json({ error: "Error al obtener usuario por ID" });
+  }
+};
+
+// Obtener el nombre del usuario por cédula
+export const obtenerNombrePorCedula = async (req, res) => {
+  try {
+    const { cedula_usuario } = req.params;
+    const usuario = await sql`
+      SELECT nombre, apellido FROM usuarios WHERE cedula_usuario = ${cedula_usuario}
+    `;
+    if (usuario.length === 0) {
+      return res.status(404).json({ error: "Usuario no encontrado" });
+    }
+    res.json({ nombre: usuario[0].nombre, apellido: usuario[0].apellido });
+  } catch (error) {
+    console.error("Error al obtener nombre por cédula:", error);
+    res.status(500).json({ error: "Error al obtener nombre por cédula" });
   }
 };
