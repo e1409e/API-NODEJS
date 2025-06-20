@@ -98,7 +98,7 @@ export const crearIncidencia = async (req, res) => {
         if (!req.sql) {
             throw new Error("No se encontró la conexión SQL en req.sql");
         }
-
+        //conmentario para el github
         // Ejecutar la consulta SQL
         const nuevaIncidencia = await req.sql`
             SELECT insertar_incidencia(
