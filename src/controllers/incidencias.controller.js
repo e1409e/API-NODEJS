@@ -1,11 +1,19 @@
 import { validationResult } from 'express-validator';
-import { sql } from '../db.js';  // Asegúrate de que la ruta a tu conexión a la base de datos es correcta
-import { incidenciasValidations } from '../validations/incidencias.validations.js'; //  Asegúrate de crear este archivo de validaciones
+import { sql } from '../db.js';
+import { incidenciasValidations } from '../validations/incidencias.validations.js';
 
-// Función para obtener todas las incidencias
+// Obtener todas las incidencias con nombre del estudiante
 export const obtenerIncidencias = async (req, res) => {
     try {
-        const incidencias = await req.sql`SELECT * FROM incidencias`;
+        const incidencias = await sql`
+            SELECT 
+                i.*, 
+                e.nombres AS nombre_estudiante, 
+                e.apellidos AS apellido_estudiante, 
+                e.cedula AS cedula_estudiante
+            FROM incidencias i
+            JOIN estudiantes e ON i.id_estudiante = e.id_estudiante
+        `;
         res.json(incidencias);
     } catch (error) {
         console.error('Error al obtener incidencias:', error);
@@ -13,12 +21,19 @@ export const obtenerIncidencias = async (req, res) => {
     }
 };
 
-// Función para obtener una incidencia por ID
+// Obtener una incidencia por ID
 export const obtenerIncidenciaPorId = async (req, res) => {
     try {
         const { id_incidencia } = req.params;
-        const incidencia = await req.sql`
-            SELECT * FROM incidencias WHERE id_incidencia = ${id_incidencia}
+        const incidencia = await sql`
+            SELECT 
+                i.*, 
+                e.nombres AS nombre_estudiante, 
+                e.apellidos AS apellido_estudiante, 
+                e.cedula AS cedula_estudiante
+            FROM incidencias i
+            JOIN estudiantes e ON i.id_estudiante = e.id_estudiante
+            WHERE i.id_incidencia = ${id_incidencia}
         `;
 
         if (incidencia.length === 0) {
@@ -29,6 +44,32 @@ export const obtenerIncidenciaPorId = async (req, res) => {
     } catch (error) {
         console.error('Error al obtener incidencia por ID:', error);
         res.status(500).json({ error: 'Error al obtener incidencia por ID' });
+    }
+};
+
+// Obtener incidencias por ID de estudiante
+export const obtenerIncidenciasPorEstudiante = async (req, res) => {
+    try {
+        const { id_estudiante } = req.params;
+        const incidencias = await sql`
+            SELECT 
+                i.*, 
+                e.nombres AS nombre_estudiante, 
+                e.apellidos AS apellido_estudiante, 
+                e.cedula AS cedula_estudiante
+            FROM incidencias i
+            JOIN estudiantes e ON i.id_estudiante = e.id_estudiante
+            WHERE i.id_estudiante = ${id_estudiante}
+        `;
+
+        if (incidencias.length === 0) {
+            return res.json([]); // Si no hay incidencias, devolver un array vacío
+        }
+
+        res.json(incidencias);
+    } catch (error) {
+        console.error('Error al obtener incidencias por estudiante:', error);
+        res.status(500).json({ error: 'Error al obtener incidencias por estudiante' });
     }
 };
 
