@@ -3,9 +3,13 @@ import { sql } from '../db.js';  // Asegúrate de que la ruta a tu conexión a l
 import { discapacidadValidations } from '../validations/discapacidades.validations.js'; //  Asegúrate de crear este archivo de validaciones
 
 // Función para obtener todas las discapacidades
+// Se agrega ORDER BY discapacidad ASC para devolver los registros en orden alfabético
 export const obtenerDiscapacidades = async (req, res) => {
     try {
-        const discapacidades = await req.sql`SELECT * FROM discapacidades`;
+        const discapacidades = await req.sql`
+            SELECT * FROM discapacidades
+            ORDER BY discapacidad ASC
+        `;
         res.json(discapacidades);
     } catch (error) {
         console.error('Error al obtener discapacidades:', error);
@@ -14,6 +18,7 @@ export const obtenerDiscapacidades = async (req, res) => {
 };
 
 // Función para obtener una discapacidad por ID
+// No es necesario ORDER BY aquí porque solo se busca por ID único
 export const obtenerDiscapacidadPorId = async (req, res) => {
     try {
         const { discapacidad_id } = req.params;
@@ -43,9 +48,7 @@ export const crearDiscapacidad = async (req, res) => {
     }
 
     try {
-        const {
-            discapacidad
-        } = req.body;
+        const { discapacidad } = req.body;
 
         // Verificar que la conexión SQL está correctamente definida
         if (!req.sql) {
@@ -82,22 +85,20 @@ export const editarDiscapacidad = async (req, res) => {
 
     try {
         const { discapacidad_id } = req.params;
-        const {
-            discapacidad
-        } = req.body;
+        const { discapacidad } = req.body;
 
         const discapacidadEditada = await req.sql`
             SELECT editar_discapacidad(
                 ${discapacidad_id},
                 ${discapacidad}
-            )
+            ) as success
         `;
 
-        if (discapacidadEditada.length === 0) {
-            return res.status(404).json({ error: 'Discapacidad no encontrada' });
+        if (!discapacidadEditada.length || !discapacidadEditada[0].success) {
+            return res.status(404).json({ error: 'Discapacidad no encontrada o no se pudo actualizar' });
         }
 
-        res.json(discapacidadEditada[0]);  // Devuelve la discapacidad editada
+        res.json({ message: 'Discapacidad actualizada correctamente' });
     } catch (error) {
         console.error('Error al editar discapacidad:', error);
         res.status(500).json({ error: 'Error al editar discapacidad' });
@@ -110,11 +111,11 @@ export const eliminarDiscapacidad = async (req, res) => {
         const { discapacidad_id } = req.params;
 
         const discapacidadEliminada = await req.sql`
-            SELECT eliminar_discapacidad(${discapacidad_id})
+            SELECT eliminar_discapacidad(${discapacidad_id}) as success
         `;
 
-        if (discapacidadEliminada.length === 0) {
-            return res.status(404).json({ error: 'Discapacidad no encontrada' });
+        if (!discapacidadEliminada.length || !discapacidadEliminada[0].success) {
+            return res.status(404).json({ error: 'Discapacidad no encontrada o no se pudo eliminar' });
         }
 
         res.json({ message: 'Discapacidad eliminada correctamente' });

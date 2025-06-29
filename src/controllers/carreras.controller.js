@@ -3,9 +3,15 @@ import { sql } from '../db.js';
 import { carrerasValidations } from '../validations/carreras.validations.js';
 
 // Obtener todas las carreras
+// Se agrega ORDER BY c.carrera ASC para devolver los registros en orden alfabético
 export const obtenerCarreras = async (req, res) => {
     try {
-        const carreras = await sql`SELECT c.*, f.facultad FROM carreras c JOIN facultades f ON c.id_facultad = f.id_facultad`;
+        const carreras = await sql`
+            SELECT c.*, f.facultad 
+            FROM carreras c 
+            JOIN facultades f ON c.id_facultad = f.id_facultad
+            ORDER BY c.carrera ASC
+        `;
         res.json(carreras);
     } catch (error) {
         console.error('Error al obtener las carreras:', error);
@@ -14,10 +20,16 @@ export const obtenerCarreras = async (req, res) => {
 };
 
 // Obtener una carrera por ID
+// No es necesario ORDER BY aquí porque solo se busca por ID único
 export const obtenerCarreraPorId = async (req, res) => {
     try {
         const { id_carrera } = req.params;
-        const carrera = await sql`SELECT c.*, f.facultad FROM carreras c JOIN facultades f ON c.id_facultad = f.id_facultad WHERE id_carrera = ${id_carrera}`;
+        const carrera = await sql`
+            SELECT c.*, f.facultad 
+            FROM carreras c 
+            JOIN facultades f ON c.id_facultad = f.id_facultad 
+            WHERE id_carrera = ${id_carrera}
+        `;
         if (carrera.length === 0) {
             return res.status(404).json({ error: 'Carrera no encontrada' });
         }

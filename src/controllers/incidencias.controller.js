@@ -3,6 +3,7 @@ import { sql } from '../db.js';
 import { incidenciasValidations } from '../validations/incidencias.validations.js';
 
 // Obtener todas las incidencias con nombre del estudiante
+// Se agrega ORDER BY i.fecha_incidente DESC para devolver los registros de mayor a menor
 export const obtenerIncidencias = async (req, res) => {
     try {
         const incidencias = await sql`
@@ -13,6 +14,7 @@ export const obtenerIncidencias = async (req, res) => {
                 e.cedula AS cedula_estudiante
             FROM incidencias i
             JOIN estudiantes e ON i.id_estudiante = e.id_estudiante
+            ORDER BY i.fecha_incidente DESC
         `;
         res.json(incidencias);
     } catch (error) {
@@ -34,6 +36,7 @@ export const obtenerIncidenciaPorId = async (req, res) => {
             FROM incidencias i
             JOIN estudiantes e ON i.id_estudiante = e.id_estudiante
             WHERE i.id_incidencia = ${id_incidencia}
+            ORDER BY i.fecha_incidente DESC
         `;
 
         if (incidencia.length === 0) {
@@ -48,6 +51,7 @@ export const obtenerIncidenciaPorId = async (req, res) => {
 };
 
 // Obtener incidencias por ID de estudiante
+// Se agrega ORDER BY i.fecha_incidente DESC para devolver los registros de mayor a menor
 export const obtenerIncidenciasPorEstudiante = async (req, res) => {
     try {
         const { id_estudiante } = req.params;
@@ -60,6 +64,7 @@ export const obtenerIncidenciasPorEstudiante = async (req, res) => {
             FROM incidencias i
             JOIN estudiantes e ON i.id_estudiante = e.id_estudiante
             WHERE i.id_estudiante = ${id_estudiante}
+            ORDER BY i.fecha_incidente DESC
         `;
 
         if (incidencias.length === 0) {
@@ -98,7 +103,7 @@ export const crearIncidencia = async (req, res) => {
         if (!req.sql) {
             throw new Error("No se encontró la conexión SQL en req.sql");
         }
-        //conmentario para el github
+
         // Ejecutar la consulta SQL
         const nuevaIncidencia = await req.sql`
             SELECT insertar_incidencia(
@@ -155,14 +160,14 @@ export const editarIncidencia = async (req, res) => {
                 ${descripcion_incidente},
                 ${acuerdos},
                 ${observaciones}
-            )
+            ) as success
         `;
 
-        if (incidenciaEditada.length === 0) {
-            return res.status(404).json({ error: 'Incidencia no encontrada' });
+        if (!incidenciaEditada.length || !incidenciaEditada[0].success) {
+            return res.status(404).json({ error: 'Incidencia no encontrada o no se pudo actualizar' });
         }
 
-        res.json(incidenciaEditada[0]);  // Devuelve la incidencia editada
+        res.json({ message: 'Incidencia actualizada correctamente' });
     } catch (error) {
         console.error('Error al editar incidencia:', error);
         res.status(500).json({ error: 'Error al editar incidencia' });
@@ -175,11 +180,11 @@ export const eliminarIncidencia = async (req, res) => {
         const { id_incidencia } = req.params;
 
         const incidenciaEliminada = await req.sql`
-            SELECT eliminar_incidencia(${id_incidencia})
+            SELECT eliminar_incidencia(${id_incidencia}) as success
         `;
 
-        if (incidenciaEliminada.length === 0) {
-            return res.status(404).json({ error: 'Incidencia no encontrada' });
+        if (!incidenciaEliminada.length || !incidenciaEliminada[0].success) {
+            return res.status(404).json({ error: 'Incidencia no encontrada o no se pudo eliminar' });
         }
 
         res.json({ message: 'Incidencia eliminada correctamente' });

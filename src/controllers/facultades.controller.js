@@ -1,9 +1,10 @@
 import { sql } from '../db.js';
 
 // Obtener todas las facultades
+// Se agrega ORDER BY facultad ASC para devolver los registros en orden alfabético
 export const obtenerFacultades = async (req, res) => {
     try {
-        const facultades = await sql`SELECT * FROM facultades`;
+        const facultades = await sql`SELECT * FROM facultades ORDER BY facultad ASC`;
         res.json(facultades);
     } catch (error) {
         console.error('Error al obtener facultades:', error);
@@ -75,13 +76,15 @@ export const eliminarFacultad = async (req, res) => {
     }
 };
 
+// Obtener todas las facultades con sus carreras asociadas
+// Se agrega ORDER BY facultad ASC y ORDER BY carrera ASC para devolver los registros en orden alfabético
 export const obtenerFacultadesConCarreras = async (req, res) => {
   try {
-    // Obtén todas las facultades
-    const facultades = await sql`SELECT * FROM facultades`;
+    // Obtén todas las facultades ordenadas alfabéticamente
+    const facultades = await sql`SELECT * FROM facultades ORDER BY facultad ASC`;
 
-    // Obtén todas las carreras
-    const carreras = await sql`SELECT * FROM carreras`;
+    // Obtén todas las carreras ordenadas alfabéticamente
+    const carreras = await sql`SELECT * FROM carreras ORDER BY carrera ASC`;
 
     // Asocia carreras a cada facultad
     const resultado = facultades.map(facultad => ({

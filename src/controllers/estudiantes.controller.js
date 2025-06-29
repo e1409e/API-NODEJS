@@ -1,11 +1,11 @@
 import { validationResult } from 'express-validator';
 import { sql } from '../db.js'; // Asegúrate de que la ruta a tu conexión a la base de datos es correcta
-import { estudianteValidations } from '../validations/estudiantes.validations.js'; // Asumo que estas validaciones también se actualizarán
+import { estudianteValidations } from '../validations/estudiantes.validations.js';
 
 // Función para obtener todos los estudiantes
+// Se agrega ORDER BY e.nombres ASC para devolver los registros en orden alfabético por nombres
 export const obtenerEstudiantes = async (req, res) => {
     try {
-        
         const estudiantes = await req.sql`
             SELECT 
                 e.*, 
@@ -18,6 +18,7 @@ export const obtenerEstudiantes = async (req, res) => {
             LEFT JOIN representantes r ON r.id_estudiante = e.id_estudiante
             LEFT JOIN carreras ca ON e.id_carrera = ca.id_carrera
             LEFT JOIN facultades f ON f.id_facultad = ca.id_facultad
+            ORDER BY e.nombres ASC
         `;
         res.json(estudiantes);
     } catch (error) {
@@ -30,7 +31,6 @@ export const obtenerEstudiantes = async (req, res) => {
 export const obtenerEstudiantePorId = async (req, res) => {
     try {
         const { id_estudiante } = req.params;
-        // CORREGIDO: Añadir LEFT JOIN para obtener el nombre de la discapacidad
         const estudiante = await req.sql`
             SELECT 
                 e.*, 
@@ -57,11 +57,8 @@ export const obtenerEstudiantePorId = async (req, res) => {
     }
 };
 
-
 // Función para crear un nuevo estudiante
 export const crearEstudiante = async (req, res) => {
-    // Validaciones
-    // Asegúrate de que estudianteValidations.crearEstudianteValidations esté actualizado para los nuevos campos
     await Promise.all(estudianteValidations.crearEstudianteValidations.map(validation => validation.run(req)));
 
     const errors = validationResult(req);
@@ -134,7 +131,6 @@ export const crearEstudiante = async (req, res) => {
             }
         }
 
-
         const responseData = {
             id_estudiante: nuevoEstudiante[0].id_estudiante,
             nombres,
@@ -144,16 +140,16 @@ export const crearEstudiante = async (req, res) => {
             correo,
             direccion,
             discapacidad_id,
-            fecha_nacimiento: new Date(fecha_nacimiento).toISOString(), // Asegurarse de que el formato sea ISO
+            fecha_nacimiento: new Date(fecha_nacimiento).toISOString(),
             observaciones,
             seguimiento,
-            fecha_registro: new Date().toISOString(), 
+            fecha_registro: new Date().toISOString(),
             fecha_actualizacion: new Date().toISOString(),
             id_carrera: id_carrera,
             posee_conapdis: posee_conapdis,
             otro_telefono: otro_telefono,
-            discapacidad: discapacidadNombre, // Incluir el nombre de la discapacidad
-            nombre_repre: null, // Asumimos que no hay representante al crear, o se manejaría en otro endpoint
+            discapacidad: discapacidadNombre,
+            nombre_repre: null,
             facultad: facultadData.facultad,
             siglas: facultadData.siglas,
             carrera: carreraNombre
@@ -169,7 +165,6 @@ export const crearEstudiante = async (req, res) => {
 
 // Función para editar un estudiante existente
 export const editarEstudiante = async (req, res) => {
-    // Asegúrate de que estudianteValidations.editarEstudianteValidations esté actualizado para los nuevos campos
     await Promise.all(estudianteValidations.editarEstudianteValidations.map(validation => validation.run(req)));
 
     const errors = validationResult(req);
@@ -218,10 +213,6 @@ export const editarEstudiante = async (req, res) => {
             return res.status(404).json({ error: 'Estudiante no encontrado o no se pudo actualizar' });
         }
 
-        // Opcional: Si quieres devolver el objeto completo actualizado como en crearEstudiante,
-        // tendrías que volver a hacer un SELECT * FROM estudiantes WHERE id_estudiante = ${id_estudiante}
-        // o construir el objeto con los datos enviados en el body.
-        // Por ahora, devolvemos solo el indicador de éxito.
         res.json({ editar_estudiante: true }); 
 
     } catch (error) {
@@ -236,10 +227,10 @@ export const eliminarEstudiante = async (req, res) => {
         const { id_estudiante } = req.params;
 
         const estudianteEliminado = await req.sql`
-            SELECT eliminar_estudiante(${id_estudiante})
+            SELECT eliminar_estudiante(${id_estudiante}) as success
         `;
 
-        if (estudianteEliminado.length === 0) {
+        if (!estudianteEliminado.length || estudianteEliminado[0].success === false) {
             return res.status(404).json({ error: 'Estudiante no encontrado' });
         }
 

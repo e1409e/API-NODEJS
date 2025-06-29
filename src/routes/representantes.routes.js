@@ -4,7 +4,8 @@ import {
     obtenerRepresentantePorId,
     crearRepresentante,
     editarRepresentante,
-    eliminarRepresentante
+    eliminarRepresentante,
+    obtenerRepresentantePorEstudiante // Importa la nueva función
 } from '../controllers/representantes.controller.js'; 
 
 const router = express.Router();
@@ -14,6 +15,9 @@ router.get('/', obtenerRepresentantes);
 
 // GET /representantes/:id_representante - Obtiene un representante por su ID
 router.get('/:id_representante', obtenerRepresentantePorId);
+
+// GET /representantes/estudiante/:id_estudiante - Obtiene un representante por el id del estudiante
+router.get('/estudiante/:id_estudiante', obtenerRepresentantePorEstudiante);
 
 // POST /representantes - Crea un nuevo representante
 router.post('/', crearRepresentante);

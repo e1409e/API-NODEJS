@@ -3,9 +3,13 @@ import { sql } from '../db.js';  // Asegúrate de que la ruta a tu conexión a l
 import { representanteValidations } from '../validations/representantes.validations.js'; //  Asegúrate de crear este archivo de validaciones
 
 // Función para obtener todos los representantes
+// Se agrega ORDER BY nombre_repre ASC para devolver los registros en orden alfabético
 export const obtenerRepresentantes = async (req, res) => {
     try {
-        const representantes = await req.sql`SELECT * FROM representantes`;
+        const representantes = await req.sql`
+            SELECT * FROM representantes
+            ORDER BY nombre_repre ASC
+        `;
         res.json(representantes);
     } catch (error) {
         console.error('Error al obtener representantes:', error);
@@ -29,6 +33,28 @@ export const obtenerRepresentantePorId = async (req, res) => {
     } catch (error) {
         console.error('Error al obtener representante por ID:', error);
         res.status(500).json({ error: 'Error al obtener representante por ID' });
+    }
+};
+
+// Función para obtener un representante por el id del estudiante
+export const obtenerRepresentantePorEstudiante = async (req, res) => {
+    try {
+        const { id_estudiante } = req.params;
+        const representante = await req.sql`
+            SELECT r.*, e.nombres AS nombre_estudiante, e.apellidos AS apellido_estudiante
+            FROM representantes r
+            JOIN estudiantes e ON r.id_estudiante = e.id_estudiante
+            WHERE r.id_estudiante = ${id_estudiante}
+        `;
+
+        if (representante.length === 0) {
+            return res.status(404).json({ error: 'Representante no encontrado para este estudiante' });
+        }
+
+        res.json(representante[0]);
+    } catch (error) {
+        console.error('Error al obtener representante por id_estudiante:', error);
+        res.status(500).json({ error: 'Error al obtener representante por id_estudiante' });
     }
 };
 
@@ -146,14 +172,14 @@ export const editarRepresentante = async (req, res) => {
                 ${municipio},
                 ${departamento},
                 ${estado_civil}
-            )
+            ) as success
         `;
 
-        if (representanteEditado.length === 0) {
-            return res.status(404).json({ error: 'Representante no encontrado' });
+        if (!representanteEditado.length || !representanteEditado[0].success) {
+            return res.status(404).json({ error: 'Representante no encontrado o no se pudo actualizar' });
         }
 
-        res.json(representanteEditado[0]);  // Devuelve el representante editado
+        res.json({ message: 'Representante actualizado correctamente' });
     } catch (error) {
         console.error('Error al editar representante:', error);
         res.status(500).json({ error: 'Error al editar representante' });
@@ -166,10 +192,10 @@ export const eliminarRepresentante = async (req, res) => {
         const { id_representante } = req.params;
 
         const representanteEliminado = await req.sql`
-            SELECT eliminar_representante(${id_representante})
+            SELECT eliminar_representante(${id_representante}) as success
         `;
 
-        if (representanteEliminado.length === 0) {
+        if (!representanteEliminado.length || !representanteEliminado[0].success) {
             return res.status(404).json({ error: 'Representante no encontrado' });
         }
 

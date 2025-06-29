@@ -1,21 +1,6 @@
 import { validationResult } from 'express-validator';
 import { sql } from '../db.js';
 import { historialMedicoValidations } from '../validations/historialMedico.validations.js';
-import { uploadFileToDrive, getOrCreateFolder } from '../utils/googleDrive.js';
-import fs from 'fs';
-
-// Helper para subir y limpiar archivos
-async function subirArchivoDriveYLimpiar(file, folderId) {
-    if (!file) return null;
-    const driveFile = await uploadFileToDrive({
-        filePath: file.path,
-        fileName: file.originalname,
-        mimeType: file.mimetype,
-        folderId
-    });
-    fs.unlinkSync(file.path);
-    return driveFile.webViewLink;
-}
 
 // Obtener todos los historiales médicos
 export const obtenerHistorialesMedicos = async (req, res) => {
@@ -88,9 +73,8 @@ export const obtenerHistorialMedicoPorEstudiante = async (req, res) => {
     }
 };
 
-// Crear un nuevo historial médico
+// Crear un nuevo historial médico (solo texto)
 export const crearHistorialMedico = async (req, res) => {
-    // Validaciones
     await Promise.all(historialMedicoValidations.crearHistorialMedicoValidations.map(validation => validation.run(req)));
 
     const errors = validationResult(req);
@@ -99,20 +83,8 @@ export const crearHistorialMedico = async (req, res) => {
     }
 
     try {
-        const { id_estudiante } = req.body;
-        // Espera los archivos en req.files con los nombres exactos de los campos
-        // Por ejemplo: certificado_conapdis, informe_medico, tratamiento
-        const files = req.files || {};
+        const { id_estudiante, certificado_conapdis, informe_medico, tratamiento } = req.body;
 
-        // Crea una carpeta por estudiante en Drive
-        const folderId = await getOrCreateFolder(`estudiante_${id_estudiante}`);
-
-        // Sube cada archivo y guarda la URL
-        const certificado_conapdis = await subirArchivoDriveYLimpiar(files.certificado_conapdis?.[0], folderId);
-        const informe_medico = await subirArchivoDriveYLimpiar(files.informe_medico?.[0], folderId);
-        const tratamiento = await subirArchivoDriveYLimpiar(files.tratamiento?.[0], folderId);
-
-        // Inserta en la base de datos
         const nuevoHistorialMedico = await sql`
             SELECT insertar_historial_medico(
                 ${id_estudiante},
@@ -126,7 +98,6 @@ export const crearHistorialMedico = async (req, res) => {
             throw new Error("Error al guardar el historial médico en la base de datos");
         }
 
-        // Obtener los datos del estudiante para la respuesta
         const estudiante = await sql`
             SELECT nombres AS nombre_estudiante, apellidos AS apellido_estudiante, cedula AS cedula_estudiante
             FROM estudiantes
@@ -147,7 +118,7 @@ export const crearHistorialMedico = async (req, res) => {
     }
 };
 
-// Editar un historial médico existente
+// Editar un historial médico existente (solo texto)
 export const editarHistorialMedico = async (req, res) => {
     await Promise.all(historialMedicoValidations.editarHistorialMedicoValidations.map(validation => validation.run(req)));
 
@@ -158,16 +129,7 @@ export const editarHistorialMedico = async (req, res) => {
 
     try {
         const { id_historialmedico } = req.params;
-        const { id_estudiante } = req.body;
-        const files = req.files || {};
-
-        // Crea una carpeta por estudiante en Drive
-        const folderId = await getOrCreateFolder(`estudiante_${id_estudiante}`);
-
-        // Sube cada archivo y guarda la URL
-        const certificado_conapdis = await subirArchivoDriveYLimpiar(files.certificado_conapdis?.[0], folderId);
-        const informe_medico = await subirArchivoDriveYLimpiar(files.informe_medico?.[0], folderId);
-        const tratamiento = await subirArchivoDriveYLimpiar(files.tratamiento?.[0], folderId);
+        const { id_estudiante, certificado_conapdis, informe_medico, tratamiento } = req.body;
 
         const historialMedicoEditado = await sql`
             SELECT editar_historial_medico(
@@ -183,7 +145,6 @@ export const editarHistorialMedico = async (req, res) => {
             return res.status(404).json({ error: 'Historial médico no encontrado' });
         }
 
-        // Obtener los datos del estudiante para la respuesta
         const estudiante = await sql`
             SELECT nombres AS nombre_estudiante, apellidos AS apellido_estudiante, cedula AS cedula_estudiante
             FROM estudiantes
