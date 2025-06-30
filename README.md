@@ -1,117 +1,157 @@
-# API de Gestión de Estudiantes con discapacidad
+# 🎓 API de Gestión de Estudiantes con Discapacidad para SMGED
 
-# Descripción General
-<!-- Esta API RESTful está diseñada para gestionar la información de estudiantes con discapacidad, incluyendo sus datos personales, información académica, y detalles de contacto. Desarrollada con Node.js y Express, utiliza PostgreSQL como base de datos y sigue un enfoque de diseño modular, incorporando validaciones robustas y funciones de saneamiento de datos para garantizar la integridad de la información. -->
+## 📄 Descripción General
 
-# Estructura del Proyecto
-<!-- 
+Esta API RESTful permite gestionar información de estudiantes con discapacidad: datos personales, académicos y de contacto.  
+Desarrollada con **Node.js** y **Express**, utiliza **PostgreSQL** y un diseño modular, con validaciones y saneamiento de datos para garantizar la integridad de la información.
+
+---
+
+## 📁 Estructura del Proyecto
+
+```
 API-NODEJS/
 ├── src/
-│   ├── controllers/      # Contiene la lógica de negocio para cada ruta (CRUD).
-│   ├── routes/           # Define los endpoints de la API y aplica las validaciones.
-│   ├── utilities/        # Funciones de ayuda reutilizables.
-│   ├── validations/      # Reglas de validación para los datos de entrada (express-validator).
-│   ├── config.js         # Configuración global de la aplicación.
-│   ├── db.js             # Configuración y conexión a la base de datos PostgreSQL.
-│   └── index.js          # Punto de entrada principal de la aplicación.
-├── .env                  # Variables de entorno (¡no subir a control de versiones!).
-├── package-lock.json     # Registro de dependencias exactas.
-├── package.json          # Metadatos del proyecto y scripts.
-└── README.md             # Documentación del proyecto (este archivo). -->
+│   ├── controllers/      # Lógica de negocio (CRUD)
+│   ├── routes/           # Endpoints y validaciones
+│   ├── utilities/        # Funciones reutilizables
+│   ├── validations/      # Reglas de validación (express-validator)
+│   ├── config.js         # Configuración global
+│   ├── db.js             # Conexión a PostgreSQL
+│   └── index.js          # Punto de entrada principal
+├── .env                  # Variables de entorno (no subir a git)
+├── package-lock.json     # Registro exacto de dependencias
+├── package.json          # Metadatos y scripts del proyecto
+└── README.md             # Documentación del proyecto
+```
 
-# Tecnologías Utilizadas
-<!-- 
-- Node.js: Entorno de ejecución para JavaScript.
-- Express.js: Framework web para construir la API.
-- PostgreSQL: Base de datos relacional.
-- @neondatabase/serverless: Para integración con Neon DB (servicios serverless de Postgres).
-- pg: Cliente PostgreSQL para Node.js.
-- express-validator: Middleware para la validación y saneamiento de datos.
-- dotenv: Para cargar variables de entorno desde un archivo .env.
-- cors: Para habilitar Cross-Origin Resource Sharing.
-- jsonwebtoken: Para la implementación de autenticación basada en tokens (JWT).
-- morgan: Middleware de registro de peticiones HTTP.  -->
+---
 
-# Configuración del Entorno
-<!-- 
-1. Clona el repositorio:
+## 🛠️ Tecnologías Utilizadas
+
+- **Node.js**: Entorno de ejecución JavaScript
+- **Express.js**: Framework web
+- **PostgreSQL**: Base de datos relacional
+- **@neondatabase/serverless**: Integración serverless con Neon DB
+- **pg**: Cliente PostgreSQL para Node.js
+- **express-validator**: Validación y saneamiento de datos
+- **dotenv**: Variables de entorno
+- **cors**: Cross-Origin Resource Sharing
+- **jsonwebtoken**: Autenticación JWT
+- **morgan**: Registro de peticiones HTTP
+
+---
+
+## ⚙️ Configuración del Entorno
+
+1. **Clona el repositorio:**
+    ```sh
     git clone https://github.com/e1409e/API-NODEJS
-    cd API-NODEJS 
+    cd API-NODEJS
+    ```
 
-2. Instala las dependencias: 
+2. **Instala las dependencias:**  
+    ```sh
     npm install
+    ```
 
-3. Crea el archivo de variables de entorno:
-    Crea un archivo .env en la raíz del proyecto y configura las variables necesarias para 
-    tu base de datos y otras configuraciones. Aquí un ejemplo:
+3. **Configura las variables de entorno:**  
+    Crea un archivo `.env` en la raíz del proyecto con el siguiente contenido:
 
-        PORT=3000
-        DB_HOST=your_db_host
-        DB_USER=your_db_user
-        DB_PASSWORD=your_db_password
-        DB_NAME=your_db_name
-        DB_PORT=5432
+    ```env
+    PORT=3000
+    DB_HOST=your_db_host
+    DB_USER=your_db_user
+    DB_PASSWORD=your_db_password
+    DB_NAME=your_db_name
+    DB_PORT=5432
+    ```
 
-    Importante: Nunca subas tu archivo .env a sistemas de control de versiones como Git.
--->
+    > ⚠️ **Importante:** Nunca subas tu archivo `.env` a sistemas de control de versiones.
 
-# Scripts Disponibles
-<!-- 
-Puedes ejecutar la API usando los siguientes comandos:
-- npm start: Inicia la aplicación en modo de producción.
-- npm dev: Inicia la aplicación en modo de desarrollo con node --watch, 
-    lo que reinicia automáticamente el servidor al detectar cambios en los archivos. -->
+---
 
-# Endpoints de la API (Estudiantes)
-<!--
-1. Obtener todos los estudiantes
-- URL: /estudiantes
-- Método: GET
-- Descripción: Recupera una lista de todos los estudiantes registrados.
-- Respuesta Exitosa (200 OK):
-- Errores Posibles:
-    * 500 Internal Server Error: En caso de un fallo en el servidor o la base de datos.
+## 📜 Scripts Disponibles
 
-2. Obtener estudiante por ID
-- URL: /estudiantes/:id_estudiante
-- Método: GET
-- Descripción: Recupera los detalles de un estudiante específico por su ID.
-- Parámetros de URL: id_estudiante (obligatorio): El ID único del estudiante (entero positivo).
-- Respuesta Exitosa (200 OK):
-- Errores Posibles:
-    * 400 Bad Request: Si el id_estudiante no es un entero positivo.
-    * 404 Not Found: Si el estudiante con el ID proporcionado no existe.
-    * 500 Internal Server Error: En caso de un fallo en el servidor o la base de datos.
+| Comando      | Descripción                                              |
+|--------------|---------------------------------------------------------|
+| `npm start`  | Inicia la aplicación en modo producción                 |
+| `npm run dev`| Inicia en modo desarrollo con recarga automática        |
 
+---
 
-3. Crear un nuevo estudiante
-- URL: /estudiantes
-- Método: POST
-- Descripción: Registra un nuevo estudiante en la base de datos. Los datos de texto como nombres y apellidos se formatearán automáticamente a "Capital Case", y correo a minúsculas.
-- Respuesta Exitosa (201 Created):
-- Errores Posibles:
-    * 400 Bad Request: Si los datos enviados no cumplen con las validaciones (campos faltantes, formatos incorrectos, etc.).
-    * 500 Internal Server Error: En caso de un fallo en el servidor o la base de datos.
+## 📚 Ejemplos de Endpoints de la API (Modulo de Estudiantes)
 
-4. Actualizar un estudiante existente
-- URL: /estudiantes/:id_estudiante
-- Método: PUT
-- Descripción: Actualiza la información de un estudiante. Se pueden enviar uno o más campos para actualizar parcialmente el registro. Los campos de texto también se formatearán automáticamente.
-- Parámetros de URL: id_estudiante (obligatorio): El ID del estudiante a actualizar.
-- Respuesta Exitosa (200 OK):
-- Errores Posibles:
-    * 400 Bad Request: Si el id_estudiante no es válido o si los datos enviados no cumplen con las validaciones (ej. formato de correo incorrecto).
-    * 404 Not Found: Si el estudiante con el id_estudiante proporcionado no existe o no se pudo actualizar.
-    * 500 Internal Server Error: En caso de un fallo en el servidor o la base de datos.
+### 1. Obtener todos los estudiantes
 
+- **URL:** `/estudiantes`
+- **Método:** `GET`
+- **Descripción:** Lista todos los estudiantes registrados.
+- **Respuestas:**
+    - `200 OK`: Lista de estudiantes.
+    - `500 Internal Server Error`: Error en el servidor o base de datos.
 
-5. Eliminar un estudiante
-- URL: /estudiantes/:id_estudiante
-- Método: DELETE
-- Descripción: Elimina un estudiante de la base de datos por su ID.
-- Parámetros de URL: id_estudiante (obligatorio): El ID del estudiante a eliminar.
-- Respuesta Exitosa (200 OK):
-- Errores Posibles:
-    * 400 Bad Request: Si el id_estudiante no es un entero positivo válido.
-    * 404 Not Found: Si el estudiante con el ID proporcionado no existe.
-    * 500 Internal Server Error: En caso de un fallo en el servidor o la base de datos. -->
+---
+
+### 2. Obtener estudiante por ID
+
+- **URL:** `/estudiantes/:id_estudiante`
+- **Método:** `GET`
+- **Parámetros:**  
+    - `id_estudiante` (entero positivo, obligatorio)
+- **Respuestas:**
+    - `200 OK`: Detalles del estudiante.
+    - `400 Bad Request`: ID inválido.
+    - `404 Not Found`: No existe el estudiante.
+    - `500 Internal Server Error`: Error en el servidor o base de datos.
+
+---
+
+### 3. Crear un nuevo estudiante
+
+- **URL:** `/estudiantes`
+- **Método:** `POST`
+- **Descripción:** Registra un nuevo estudiante.  
+  Los nombres y apellidos se formatean a "Capital Case", el correo a minúsculas.
+- **Respuestas:**
+    - `201 Created`: Estudiante creado.
+    - `400 Bad Request`: Datos inválidos.
+    - `500 Internal Server Error`: Error en el servidor o base de datos.
+
+---
+
+### 4. Actualizar un estudiante existente
+
+- **URL:** `/estudiantes/:id_estudiante`
+- **Método:** `PUT`
+- **Descripción:** Actualiza información de un estudiante.  
+  Permite actualización parcial y formatea los campos de texto.
+- **Parámetros:**  
+    - `id_estudiante` (obligatorio)
+- **Respuestas:**
+    - `200 OK`: Estudiante actualizado.
+    - `400 Bad Request`: ID o datos inválidos.
+    - `404 Not Found`: No existe el estudiante.
+    - `500 Internal Server Error`: Error en el servidor o base de datos.
+
+---
+
+### 5. Eliminar un estudiante
+
+- **URL:** `/estudiantes/:id_estudiante`
+- **Método:** `DELETE`
+- **Descripción:** Elimina un estudiante por su ID.
+- **Parámetros:**  
+    - `id_estudiante` (obligatorio)
+- **Respuestas:**
+    - `200 OK`: Estudiante eliminado.
+    - `400 Bad Request`: ID inválido.
+    - `404 Not Found`: No existe el estudiante.
+    - `500 Internal Server Error`: Error en el servidor o base de datos.
+
+---
+
+## 📬 Contacto
+
+¿Dudas o sugerencias?  
+Abre un issue o contacta al [autor en GitHub](https://github.com/e1409e)
