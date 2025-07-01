@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: routes/incidencias.routes.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: routes/incidencias.routes.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * @file Este archivo define las rutas para la gestión de incidencias en la API.
+ * @description Configura los endpoints para realizar operaciones CRUD (Crear, Leer, Actualizar, Eliminar)
+ * sobre las incidencias. Integra validaciones de datos de entrada utilizando `express-validator`
+ * para asegurar la integridad y el formato correcto de la información recibida en las peticiones.
+ * @author Eric
+ * @version 1.0.0
+ * @module routes/incidencias.routes
+ * @see {@link module:controllers/incidencias.controller} Para la lógica de negocio de cada ruta.
+ * @see {@link module:validations/incidencias.validations} Para las reglas de validación de datos.
+ */
+
+import express from 'express';
+import { validationResult } from 'express-validator'; // Se importa la función 'validationResult' para recopilar errores de validación.
+
+import {
+    obtenerIncidencias,
+    obtenerIncidenciaPorId,
+    obtenerIncidenciasPorEstudiante,
+    crearIncidencia,
+    editarIncidencia,
+    eliminarIncidencia
+} from '../controllers/incidencias.controller.js';
+
+import { incidenciasValidations } from '../validations/incidencias.validations.js'; // Importa las validaciones de incidencias
+
+/**
+ * @description Instancia de Express Router para gestionar las rutas de incidencias.
+ * @type {express.Router}
+ */
+const router = express.Router();
+
+/**
+ * @description Middleware personalizado para manejar los errores de validación de `express-validator`.
+ * Si existen errores de validación en la solicitud, intercepta la petición y responde con
+ * un estado 400 (Bad Request) y un array de los errores encontrados.
+ * Si no hay errores de validación, pasa el control al siguiente middleware o controlador.
+ * @param {object} req - Objeto de solicitud de Express.
+ * @param {object} res - Objeto de respuesta de Express.
+ * @param {function} next - Función para pasar el control al siguiente middleware o controlador.
+ * @returns {void} Responde con errores de validación o pasa al siguiente middleware.
+ * @function
+ */
+const validar = (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errores: errors.array() });
+    }
+    next();
+};
+
+/**
+ * @description Ruta para obtener todas las incidencias registradas en el sistema.
+ * @method GET
+ * @route /incidencias
+ * @param {function} obtenerIncidencias - Controlador que maneja la lógica para obtener todas las incidencias.
+ */
+router.get('/', obtenerIncidencias);
+
+/**
+ * @description Ruta para obtener la información de una incidencia específica por su ID.
+ * Aplica validación al parámetro `id_incidencia`.
+ * @method GET
+ * @route /incidencias/:id_incidencia
+ * @param {string} :id_incidencia - ID único de la incidencia a buscar.
+ * @param {Array&lt;import('express-validator').ValidationChain>} incidenciasValidations.eliminarIncidenciaValidations[0] - Middleware de validación para el ID de la incidencia.
+ * @param {function} validar - Middleware para manejar los resultados de la validación.
+ * @param {function} obtenerIncidenciaPorId - Controlador que maneja la lógica para obtener una incidencia por ID.
+ */
+router.get(
+    '/:id_incidencia',
+    incidenciasValidations.eliminarIncidenciaValidations[0], // Valida el `param('id_incidencia')`
+    validar,
+    obtenerIncidenciaPorId
+);
+
+/**
+ * @description Ruta para obtener las incidencias de un estudiante específico por su ID de estudiante.
+ * @method GET
+ * @route /incidencias/estudiante/:id_estudiante
+ * @param {string} :id_estudiante - ID único del estudiante cuyas incidencias se desean obtener.
+ * @param {function} obtenerIncidenciasPorEstudiante - Controlador que maneja la lógica para obtener incidencias por ID de estudiante.
+ */
+router.get('/estudiante/:id_estudiante', obtenerIncidenciasPorEstudiante); // No se aplica validación de ID de estudiante en la ruta, se asume que el controlador lo maneja o que la ruta que lleva a este endpoint lo valida.
+
+/**
+ * @description Ruta para crear una nueva incidencia.
+ * Aplica las validaciones definidas en `crearIncidenciaValidations` antes de ejecutar el controlador.
+ * @method POST
+ * @route /incidencias
+ * @param {Array&lt;import('express-validator').ValidationChain>} incidenciasValidations.crearIncidenciaValidations - Middlewares de validación para la creación de incidencias.
+ * @param {function} validar - Middleware para manejar los resultados de la validación.
+ * @param {function} crearIncidencia - Controlador que maneja la lógica de creación de incidencia.
+ */
+router.post(
+    '/',
+    incidenciasValidations.crearIncidenciaValidations,
+    validar,
+    crearIncidencia
+);
+
+/**
+ * @description Ruta para editar una incidencia existente por su ID.
+ * Aplica las validaciones definidas en `editarIncidenciaValidations` antes de ejecutar el controlador.
+ * @method PUT
+ * @route /incidencias/:id_incidencia
+ * @param {string} :id_incidencia - ID único de la incidencia a editar.
+ * @param {Array&lt;import('express-validator').ValidationChain>} incidenciasValidations.editarIncidenciaValidations - Middlewares de validación para la edición de incidencias.
+ * @param {function} validar - Middleware para manejar los resultados de la validación.
+ * @param {function} editarIncidencia - Controlador que maneja la lógica de edición de incidencia.
+ */
+router.put(
+    '/:id_incidencia',
+    incidenciasValidations.editarIncidenciaValidations,
+    validar,
+    editarIncidencia
+);
+
+/**
+ * @description Ruta para eliminar una incidencia del sistema por su ID.
+ * Aplica validación al parámetro `id_incidencia`.
+ * @method DELETE
+ * @route /incidencias/:id_incidencia
+ * @param {string} :id_incidencia - ID único de la incidencia a eliminar.
+ * @param {Array&lt;import('express-validator').ValidationChain>} incidenciasValidations.eliminarIncidenciaValidations[0] - Middleware de validación para el ID de la incidencia.
+ * @param {function} validar - Middleware para manejar los resultados de la validación.
+ * @param {function} eliminarIncidencia - Controlador que maneja la lógica de eliminación de incidencia.
+ */
+router.delete(
+    '/:id_incidencia',
+    incidenciasValidations.eliminarIncidenciaValidations[0], // Valida el `param('id_incidencia')`
+    validar,
+    eliminarIncidencia
+);
+
+export default router;</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="controllers_carreras.module_controller.html">controllers/carreras.controller</a></li><li><a href="controllers_citas.module_controller.html">controllers/citas.controller</a></li><li><a href="controllers_discapacidades.module_controller.html">controllers/discapacidades.controller</a></li><li><a href="controllers_facultades.module_controller.html">controllers/facultades.controller</a></li><li><a href="controllers_historialMedico.module_controller.html">controllers/historialMedico.controller</a></li><li><a href="controllers_incidencias.module_controller.html">controllers/incidencias.controller</a></li><li><a href="controllers_reportePsicologico.module_controller.html">controllers/reportePsicologico.controller</a></li><li><a href="controllers_representantes.module_controller.html">controllers/representantes.controller</a></li><li><a href="module-config.html">config</a></li><li><a href="module-db.html">db</a></li><li><a href="module-utilities_formatters.html">utilities/formatters</a></li><li><a href="routes_carreras.module_routes.html">routes/carreras.routes</a></li><li><a href="routes_citas.module_routes.html">routes/citas.routes</a></li><li><a href="routes_discapacidades.module_routes.html">routes/discapacidades.routes</a></li><li><a href="routes_estudiantes.module_routes.html">routes/estudiantes.routes</a></li><li><a href="routes_facultades.module_routes.html">routes/facultades.routes</a></li><li><a href="routes_historialMedico.module_routes.html">routes/historialMedico.routes</a></li><li><a href="routes_incidencias.module_routes.html">routes/incidencias.routes</a></li><li><a href="routes_reportePsicologico.module_routes.html">routes/reportePsicologico.routes</a></li><li><a href="routes_representantes.module_routes.html">routes/representantes.routes</a></li><li><a href="routes_usuarios.module_routes.html">routes/usuarios.routes</a></li><li><a href="validations_carreras.module_validations.html">validations/carreras.validations</a></li><li><a href="validations_citas.module_validations.html">validations/citas.validations</a></li><li><a href="validations_discapacidades.module_validations.html">validations/discapacidades.validations</a></li><li><a href="validations_estudiantes.module_validations.html">validations/estudiantes.validations</a></li><li><a href="validations_facultades.module_validations.html">validations/facultades.validations</a></li><li><a href="validations_historialMedico.module_validations.html">validations/historialMedico.validations</a></li><li><a href="validations_incidencias.module_validations.html">validations/incidencias.validations</a></li><li><a href="validations_reportePsicologico.module_validations.html">validations/reportePsicologico.validations</a></li><li><a href="validations_representantes.module_validations.html">validations/representantes.validations</a></li><li><a href="validations_usuarios.module_validations.html">validations/usuarios.validations</a></li></ul><h3>Namespaces</h3><ul><li><a href="validations_carreras.module_validations-carrerasValidations.html">carrerasValidations</a></li><li><a href="validations_citas.module_validations-citaValidations.html">citaValidations</a></li><li><a href="validations_discapacidades.module_validations-discapacidadValidations.html">discapacidadValidations</a></li><li><a href="validations_estudiantes.module_validations-estudianteValidations.html">estudianteValidations</a></li><li><a href="validations_facultades.module_validations-facultadesValidations.html">facultadesValidations</a></li><li><a href="validations_historialMedico.module_validations-historialMedicoValidations.html">historialMedicoValidations</a></li><li><a href="validations_incidencias.module_validations-incidenciasValidations.html">incidenciasValidations</a></li><li><a href="validations_reportePsicologico.module_validations-reportePsicologicoValidations.html">reportePsicologicoValidations</a></li><li><a href="validations_representantes.module_validations-representanteValidations.html">representanteValidations</a></li><li><a href="validations_usuarios.module_validations-usuarioValidations.html">usuarioValidations</a></li></ul><h3>Global</h3><ul><li><a href="global.html#DELETE">DELETE</a></li><li><a href="global.html#GET">GET</a></li><li><a href="global.html#POST">POST</a></li><li><a href="global.html#PUT">PUT</a></li><li><a href="global.html#app">app</a></li><li><a href="global.html#crearEstudiante">crearEstudiante</a></li><li><a href="global.html#editarEstudiante">editarEstudiante</a></li><li><a href="global.html#eliminarEstudiante">eliminarEstudiante</a></li><li><a href="global.html#obtenerEstudiantePorId">obtenerEstudiantePorId</a></li><li><a href="global.html#obtenerEstudiantes">obtenerEstudiantes</a></li><li><a href="global.html#sql">sql</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Tue Jul 01 2025 16:26:15 GMT-0400 (hora de Venezuela)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

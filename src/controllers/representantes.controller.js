@@ -1,12 +1,31 @@
-import { validationResult } from 'express-validator';
-import { sql } from '../db.js';  // Asegúrate de que la ruta a tu conexión a la base de datos es correcta
-import { representanteValidations } from '../validations/representantes.validations.js'; //  Asegúrate de crear este archivo de validaciones
+/**
+ * @file Este archivo contiene los controladores para la gestión de representantes.
+ * @description Implementa la lógica de negocio para obtener, crear, actualizar y eliminar
+ * registros de representantes, interactuando con la base de datos y utilizando
+ * las validaciones definidas para asegurar la integridad de los datos.
+ * @author Eric
+ * @version 1.0.0
+ * @module controllers/representantes.controller
+ * @see {@link module:validations/representantes.validations} Para las reglas de validación de datos.
+ * @see {@link module:db} Para la conexión a la base de datos.
+ */
 
-// Función para obtener todos los representantes
-// Se agrega ORDER BY nombre_repre ASC para devolver los registros en orden alfabético
+import { validationResult } from 'express-validator';
+import { sql } from '../db.js';
+import { representanteValidations } from '../validations/representantes.validations.js';
+
+/**
+ * @description Obtiene todos los representantes registrados en el sistema.
+ * Los resultados se ordenan por `nombre_repre` de forma ascendente.
+ * @param {object} req - Objeto de solicitud de Express.
+ * @param {object} res - Objeto de respuesta de Express.
+ * @returns {Promise<void>} Responde con un array de objetos de representante o un mensaje de error.
+ * @method GET
+ * @route /representantes
+ */
 export const obtenerRepresentantes = async (req, res) => {
     try {
-        const representantes = await req.sql`
+        const representantes = await sql`
             SELECT * FROM representantes
             ORDER BY nombre_repre ASC
         `;
@@ -17,11 +36,26 @@ export const obtenerRepresentantes = async (req, res) => {
     }
 };
 
-// Función para obtener un representante por ID
+/**
+ * @description Obtiene un representante específico por su ID.
+ * Aplica validación al parámetro `id_representante` antes de la consulta.
+ * @param {object} req - Objeto de solicitud de Express. Se espera `req.params.id_representante`.
+ * @param {object} res - Objeto de respuesta de Express.
+ * @returns {Promise<void>} Responde con un objeto de representante o un mensaje de error 404 si no se encuentra.
+ * @method GET
+ * @route /representantes/:id_representante
+ */
 export const obtenerRepresentantePorId = async (req, res) => {
+    // Ejecuta la validación del parámetro id_representante
+    await Promise.all(representanteValidations.editarRepresentanteValidations.filter(v => v.builder.fields.includes('id_representante')).map(validation => validation.run(req)));
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+    }
+
     try {
         const { id_representante } = req.params;
-        const representante = await req.sql`
+        const representante = await sql`
             SELECT * FROM representantes WHERE id_representante = ${id_representante}
         `;
 
@@ -36,11 +70,27 @@ export const obtenerRepresentantePorId = async (req, res) => {
     }
 };
 
-// Función para obtener un representante por el id del estudiante
+/**
+ * @description Obtiene un representante asociado a un estudiante específico por el ID del estudiante.
+ * Incluye el nombre y apellido del estudiante asociado. Aplica validación al parámetro `id_estudiante`.
+ * @param {object} req - Objeto de solicitud de Express. Se espera `req.params.id_estudiante`.
+ * @param {object} res - Objeto de respuesta de Express.
+ * @returns {Promise<void>} Responde con un objeto de representante o un mensaje de error 404 si no se encuentra.
+ * @method GET
+ * @route /representantes/estudiante/:id_estudiante
+ */
 export const obtenerRepresentantePorEstudiante = async (req, res) => {
+    // Ejecuta la validación del parámetro id_estudiante
+    // Reutilizamos la validación de id_estudiante de crearRepresentanteValidations
+    await Promise.all(representanteValidations.crearRepresentanteValidations.filter(v => v.builder.fields.includes('id_estudiante')).map(validation => validation.run(req)));
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+    }
+
     try {
         const { id_estudiante } = req.params;
-        const representante = await req.sql`
+        const representante = await sql`
             SELECT r.*, e.nombres AS nombre_estudiante, e.apellidos AS apellido_estudiante
             FROM representantes r
             JOIN estudiantes e ON r.id_estudiante = e.id_estudiante
@@ -58,12 +108,22 @@ export const obtenerRepresentantePorEstudiante = async (req, res) => {
     }
 };
 
-// Función para crear un nuevo representante
+/**
+ * @description Crea un nuevo registro de representante en la base de datos.
+ * Aplica las validaciones definidas en `representanteValidations.crearRepresentanteValidations`
+ * para asegurar la integridad de los datos recibidos.
+ * @param {object} req - Objeto de solicitud de Express. Se espera `req.body` con los datos del representante.
+ * @param {object} res - Objeto de respuesta de Express.
+ * @returns {Promise<void>} Responde con el objeto del representante creado o con errores de validación/servidor.
+ * @method POST
+ * @route /representantes
+ */
 export const crearRepresentante = async (req, res) => {
-    // Validaciones
+    // Ejecuta todas las validaciones definidas para la creación de representante.
     await Promise.all(representanteValidations.crearRepresentanteValidations.map(validation => validation.run(req)));
 
     const errors = validationResult(req);
+    // Si hay errores de validación, devuelve una respuesta 400 con los detalles de los errores.
     if (!errors.isEmpty()) {
         return res.status(400).json({ errors: errors.array() });
     }
@@ -87,29 +147,24 @@ export const crearRepresentante = async (req, res) => {
             estado_civil
         } = req.body;
 
-        // Verificar que la conexión SQL está correctamente definida
-        if (!req.sql) {
-            throw new Error("No se encontró la conexión SQL en req.sql");
-        }
-
-        // Ejecutar la consulta SQL
-        const nuevoRepresentante = await req.sql`
+        // Llama a una función almacenada en la base de datos para insertar el nuevo representante.
+        const nuevoRepresentante = await sql`
             SELECT insertar_representante(
                 ${id_estudiante},
                 ${nombre_repre},
                 ${parentesco},
                 ${cedula_repre},
-                ${telefono_repre},
-                ${correo_repre},
-                ${lugar_nacimiento},
-                ${fecha_nacimiento}::date,
-                ${direccion},
-                ${ocupacion},
-                ${lugar_trabajo},
-                ${estado},
-                ${municipio},
-                ${departamento},
-                ${estado_civil}
+                ${telefono_repre || null},
+                ${correo_repre || null},
+                ${lugar_nacimiento || null},
+                ${fecha_nacimiento ? new Date(fecha_nacimiento) : null}::date,
+                ${direccion || null},
+                ${ocupacion || null},
+                ${lugar_trabajo || null},
+                ${estado || null},
+                ${municipio || null},
+                ${departamento || null},
+                ${estado_civil || null}
             ) as representante;
         `;
 
@@ -125,11 +180,22 @@ export const crearRepresentante = async (req, res) => {
     }
 };
 
-// Función para editar un representante existente
+/**
+ * @description Actualiza un registro de representante existente en la base de datos por su ID.
+ * Aplica las validaciones definidas en `representanteValidations.editarRepresentanteValidations`
+ * para el ID del representante y los campos a actualizar.
+ * @param {object} req - Objeto de solicitud de Express. Se espera `req.params.id_representante` y campos opcionales en `req.body`.
+ * @param {object} res - Objeto de respuesta de Express.
+ * @returns {Promise<void>} Responde con un mensaje de éxito o con errores de validación/servidor.
+ * @method PUT
+ * @route /representantes/:id_representante
+ */
 export const editarRepresentante = async (req, res) => {
+    // Ejecuta todas las validaciones definidas para la edición de representante.
     await Promise.all(representanteValidations.editarRepresentanteValidations.map(validation => validation.run(req)));
 
     const errors = validationResult(req);
+    // Si hay errores de validación, devuelve una respuesta 400 con los detalles de los errores.
     if (!errors.isEmpty()) {
         return res.status(400).json({ errors: errors.array() });
     }
@@ -154,27 +220,28 @@ export const editarRepresentante = async (req, res) => {
             estado_civil
         } = req.body;
 
-        const representanteEditado = await req.sql`
+        // Llama a una función almacenada en la base de datos para editar el representante.
+        const representanteEditado = await sql`
             SELECT editar_representante(
                 ${id_representante},
-                ${id_estudiante},
-                ${nombre_repre},
-                ${parentesco},
-                ${cedula_repre},
-                ${telefono_repre},
-                ${correo_repre},
-                ${lugar_nacimiento},
-                ${fecha_nacimiento},
-                ${direccion},
-                ${ocupacion},
-                ${lugar_trabajo},
-                ${estado},
-                ${municipio},
-                ${departamento},
-                ${estado_civil}
+                ${id_estudiante || null},
+                ${nombre_repre || null},
+                ${parentesco || null},
+                ${telefono_repre || null},
+                ${correo_repre || null},
+                ${lugar_nacimiento || null},
+                ${fecha_nacimiento ? new Date(fecha_nacimiento) : null}::date,
+                ${direccion || null},
+                ${ocupacion || null},
+                ${lugar_trabajo || null},
+                ${estado || null},
+                ${municipio || null},
+                ${departamento || null},
+                ${estado_civil || null}
             ) as success
         `;
 
+        // Si la función de la DB indica que no se pudo actualizar (ej. representante no encontrado), devuelve 404.
         if (!representanteEditado.length || !representanteEditado[0].success) {
             return res.status(404).json({ error: 'Representante no encontrado o no se pudo actualizar' });
         }
@@ -186,17 +253,33 @@ export const editarRepresentante = async (req, res) => {
     }
 };
 
-// Función para eliminar un representante
+/**
+ * @description Elimina un registro de representante de la base de datos por su ID.
+ * Aplica validación al parámetro `id_representante`.
+ * @param {object} req - Objeto de solicitud de Express. Se espera `req.params.id_representante`.
+ * @param {object} res - Objeto de respuesta de Express.
+ * @returns {Promise<void>} Responde con un mensaje de éxito o con errores de validación/servidor.
+ * @method DELETE
+ * @route /representantes/:id_representante
+ */
 export const eliminarRepresentante = async (req, res) => {
+    // Ejecuta la validación del parámetro id_representante
+    await Promise.all(representanteValidations.editarRepresentanteValidations.filter(v => v.builder.fields.includes('id_representante')).map(validation => validation.run(req)));
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+    }
+
     try {
         const { id_representante } = req.params;
 
-        const representanteEliminado = await req.sql`
+        const representanteEliminado = await sql`
             SELECT eliminar_representante(${id_representante}) as success
         `;
 
+        // Si la función de la DB indica que no se pudo eliminar (ej. representante no encontrado), devuelve 404.
         if (!representanteEliminado.length || !representanteEliminado[0].success) {
-            return res.status(404).json({ error: 'Representante no encontrado' });
+            return res.status(404).json({ error: 'Representante no encontrado o no se pudo eliminar' });
         }
 
         res.json({ message: 'Representante eliminado correctamente' });

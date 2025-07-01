@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "start": "node src/index.js",
-    "dev": "node --watch src/index.js"
+    "dev": "node --watch src/index.js",
+    "docs": "jsdoc -c jsdoc.json"
   },
   "keywords": [],
   "author": "",
@@ -23,5 +24,8 @@
     "morgan": "^1.10.0",
     "multer": "^2.0.1",
     "pg": "^8.15.6"
+  },
+  "devDependencies": {
+    "jsdoc": "^4.0.4"
   }
 }

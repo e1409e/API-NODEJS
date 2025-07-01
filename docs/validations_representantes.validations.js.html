@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: validations/representantes.validations.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: validations/representantes.validations.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * @file Este archivo define las validaciones para las rutas relacionadas con los representantes.
+ * @description Utiliza la librería `express-validator` para asegurar que los datos enviados
+ * en las peticiones HTTP para la creación y edición de representantes cumplan con los requisitos
+ * de formato, presencia y valores válidos. Incluye validaciones detalladas para campos como
+ * nombres, cédula, teléfono, correo, fechas, direcciones y otros datos personales y laborales.
+ * @author Eric
+ * @version 1.0.0
+ * @module validations/representantes.validations
+ * @see {@link https://express-validator.github.io/docs/} Para la documentación oficial de express-validator.
+ */
+
+import { body, param } from 'express-validator';
+
+/**
+ * @description Objeto que agrupa todas las validaciones relacionadas con las operaciones de representantes.
+ * Cada propiedad es un array de middlewares de validación de `express-validator`
+ * que se pueden aplicar a rutas específicas.
+ * @namespace representanteValidations
+ */
+export const representanteValidations = {
+    /**
+     * @description Validaciones para la creación de un nuevo representante.
+     * Asegura que todos los campos requeridos estén presentes y cumplan con los formatos esperados.
+     * @type {Array&lt;import('express-validator').ValidationChain>}
+     */
+    crearRepresentanteValidations: [
+        /**
+         * @description Valida el campo `id_estudiante`.
+         * - Es requerido (no vacío).
+         * - Debe ser un número entero positivo (mayor o igual a 1).
+         * @name id_estudiante
+         * @memberof representanteValidations.crearRepresentanteValidations
+         * @type {import('express-validator').ValidationChain}
+         */
+        body('id_estudiante')
+            .notEmpty().withMessage('El ID del estudiante es requerido.')
+            .isInt({ min: 1 }).withMessage('El ID del estudiante debe ser un entero positivo.'),
+
+        /**
+         * @description Valida el campo `nombre_repre`.
+         * - Es requerido (no vacío).
+         * - Debe ser una cadena de texto.
+         * - Solo puede contener letras (incluyendo acentos y 'ñ') y espacios simples.
+         * @name nombre_repre
+         * @memberof representanteValidations.crearRepresentanteValidations
+         * @type {import('express-validator').ValidationChain}
+         */
+        body('nombre_repre')
+            .notEmpty().withMessage('El nombre del representante es requerido.')
+            .isString().withMessage('El nombre del representante debe ser texto.')
+            .matches(/^(?!.*\s{2})[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/).withMessage('El nombre del representante solo puede contener letras y espacios (no más de un espacio consecutivo).'),
+
+        /**
+         * @description Valida el campo `parentesco`.
+         * - Es requerido (no vacío).
+         * - Debe ser una cadena de texto.
+         * - Solo puede contener letras (incluyendo acentos y 'ñ'), espacios, puntos y comas.
+         * @name parentesco
+         * @memberof representanteValidations.crearRepresentanteValidations
+         * @type {import('express-validator').ValidationChain}
+         */
+        body('parentesco')
+            .notEmpty().withMessage('El parentesco es requerido.')
+            .isString().withMessage('El parentesco debe ser texto.')
+            .matches(/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s.,]+$/).withMessage('El parentesco contiene caracteres no permitidos. Solo se permiten letras, espacios, puntos y comas.'),
+
+        /**
+         * @description Valida el campo `cedula_repre`.
+         * - Es requerido (no vacío).
+         * - Debe ser una cadena de texto.
+         * - Debe seguir el formato `V-XXXXXXXX` o `E-XXXXXXXX` (donde X son dígitos).
+         * - La parte numérica debe tener entre 7 y 15 dígitos.
+         * - La longitud total de la cédula (incluyendo prefijo y guion) debe ser entre 9 y 17 caracteres.
+         * @name cedula_repre
+         * @memberof representanteValidations.crearRepresentanteValidations
+         * @type {import('express-validator').ValidationChain}
+         */
+        body('cedula_repre')
+            .notEmpty().withMessage('La cédula del representante es requerida.')
+            .isString().withMessage('La cédula del representante debe ser texto.')
+            .matches(/^[VE]-\d{7,15}$/).withMessage('La cédula debe seguir el formato V-XXXXXXXX o E-XXXXXXXX, con 7 a 15 dígitos.'),
+            // La longitud total (prefijo + guion + dígitos) será entre 9 y 17.
+            // No es necesario isLength si el regex ya lo valida implícitamente.
+
+        /**
+         * @description Valida el campo `telefono_repre`.
+         * - Es opcional (permite `null`, `undefined` o cadena vacía).
+         * - Si está presente, debe ser una cadena de texto.
+         * - Si está presente, solo puede contener dígitos.
+         * - Si está presente, debe tener entre 7 y 15 caracteres.
+         * @name telefono_repre
+         * @memberof representanteValidations.crearRepresentanteValidations
+         * @type {import('express-validator').ValidationChain}
+         */
+        body('telefono_repre')
+            .optional({ nullable: true, checkFalsy: true })
+            .isString().withMessage('El teléfono del representante debe ser texto.')
+            .matches(/^\d+$/).withMessage('El teléfono del representante solo puede contener dígitos.')
+            .isLength({ min: 7, max: 15 }).withMessage('El teléfono del representante debe tener entre 7 y 15 dígitos.'),
+
+        /**
+         * @description Valida el campo `correo_repre`.
+         * - Es opcional (permite `null`, `undefined` o cadena vacía).
+         * - Si está presente, debe ser una dirección de correo electrónico válida.
+         * @name correo_repre
+         * @memberof representanteValidations.crearRepresentanteValidations
+         * @type {import('express-validator').ValidationChain}
+         */
+        body('correo_repre')
+            .optional({ nullable: true, checkFalsy: true })
+            .isEmail().withMessage('El correo del representante debe ser una dirección de correo válida.'),
+
+        /**
+         * @description Valida el campo `lugar_nacimiento`.
+         * - Es opcional (permite `null`, `undefined` o cadena vacía).
+         * - Si está presente, debe ser una cadena de texto.
+         * - Si está presente, solo puede contener letras, números, espacios, puntos, comas, dos puntos, comillas y guiones.
+         * @name lugar_nacimiento
+         * @memberof representanteValidations.crearRepresentanteValidations
+         * @type {import('express-validator').ValidationChain}
+         */
+        body('lugar_nacimiento')
+            .optional({ nullable: true, checkFalsy: true })
+            .isString().withMessage('El lugar de nacimiento debe ser texto.')
+            .matches(/^[a-zA-Z0-9áéíóúÁÉÍÓÚñÑ\s.,;:'"()\-]+$/).withMessage('El lugar de nacimiento contiene caracteres no permitidos.'),
+
+        /**
+         * @description Valida el campo `fecha_nacimiento`.
+         * - Es opcional (permite `null`, `undefined` o cadena vacía).
+         * - Si está presente, debe ser una fecha válida en formato ISO 8601 (YYYY-MM-DD).
+         * - Se convierte a un objeto `Date`.
+         * @name fecha_nacimiento
+         * @memberof representanteValidations.crearRepresentanteValidations
+         * @type {import('express-validator').ValidationChain}
+         */
+        body('fecha_nacimiento')
+            .optional({ nullable: true, checkFalsy: true })
+            .isISO8601().toDate().withMessage('La fecha de nacimiento debe ser una fecha válida en formato YYYY-MM-DD.'),
+
+        /**
+         * @description Valida el campo `direccion`.
+         * - Es opcional (permite `null`, `undefined` o cadena vacía).
+         * - Si está presente, debe ser una cadena de texto.
+         * - Si está presente, solo puede contener letras, números, espacios, puntos, comas, dos puntos, comillas y guiones.
+         * @name direccion
+         * @memberof representanteValidations.crearRepresentanteValidations
+         * @type {import('express-validator').ValidationChain}
+         */
+        body('direccion')
+            .optional({ nullable: true, checkFalsy: true })
+            .isString().withMessage('La dirección debe ser texto.')
+            .matches(/^[a-zA-Z0-9áéíóúÁÉÍÓÚñÑ\s.,;:'"()\-]+$/).withMessage('La dirección contiene caracteres no permitidos.'),
+
+        /**
+         * @description Valida el campo `ocupacion`.
+         * - Es opcional (permite `null`, `undefined` o cadena vacía).
+         * - Si está presente, debe ser una cadena de texto.
+         * - Si está presente, solo puede contener letras (incluyendo acentos y 'ñ'), espacios, puntos y comas.
+         * @name ocupacion
+         * @memberof representanteValidations.crearRepresentanteValidations
+         * @type {import('express-validator').ValidationChain}
+         */
+        body('ocupacion')
+            .optional({ nullable: true, checkFalsy: true })
+            .isString().withMessage('La ocupación debe ser texto.')
+            .matches(/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s.,]+$/).withMessage('La ocupación contiene caracteres no permitidos. Solo se permiten letras, espacios, puntos y comas.'),
+
+        /**
+         * @description Valida el campo `lugar_trabajo`.
+         * - Es opcional (permite `null`, `undefined` o cadena vacía).
+         * - Si está presente, debe ser una cadena de texto.
+         * - Si está presente, solo puede contener letras, números, espacios, puntos, comas, dos puntos, comillas y guiones.
+         * @name lugar_trabajo
+         * @memberof representanteValidations.crearRepresentanteValidations
+         * @type {import('express-validator').ValidationChain}
+         */
+        body('lugar_trabajo')
+            .optional({ nullable: true, checkFalsy: true })
+            .isString().withMessage('El lugar de trabajo debe ser texto.')
+            .matches(/^[a-zA-Z0-9áéíóúÁÉÍÓÚñÑ\s.,;:'"()\-]+$/).withMessage('El lugar de trabajo contiene caracteres no permitidos.'),
+
+        /**
+         * @description Valida el campo `estado`.
+         * - Es opcional (permite `null`, `undefined` o cadena vacía).
+         * - Si está presente, debe ser una cadena de texto.
+         * - Si está presente, solo puede contener letras (incluyendo acentos y 'ñ') y espacios.
+         * @name estado
+         * @memberof representanteValidations.crearRepresentanteValidations
+         * @type {import('express-validator').ValidationChain}
+         */
+        body('estado')
+            .optional({ nullable: true, checkFalsy: true })
+            .isString().withMessage('El estado debe ser texto.')
+            .matches(/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/).withMessage('El estado contiene caracteres no permitidos. Solo se permiten letras y espacios.'),
+
+        /**
+         * @description Valida el campo `municipio`.
+         * - Es opcional (permite `null`, `undefined` o cadena vacía).
+         * - Si está presente, debe ser una cadena de texto.
+         * - Si está presente, solo puede contener letras (incluyendo acentos y 'ñ') y espacios.
+         * @name municipio
+         * @memberof representanteValidations.crearRepresentanteValidations
+         * @type {import('express-validator').ValidationChain}
+         */
+        body('municipio')
+            .optional({ nullable: true, checkFalsy: true })
+            .isString().withMessage('El municipio debe ser texto.')
+            .matches(/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/).withMessage('El municipio contiene caracteres no permitidos. Solo se permiten letras y espacios.'),
+
+        /**
+         * @description Valida el campo `departamento`.
+         * - Es opcional (permite `null`, `undefined` o cadena vacía).
+         * - Si está presente, debe ser una cadena de texto.
+         * - Si está presente, solo puede contener letras (incluyendo acentos y 'ñ') y espacios.
+         * @name departamento
+         * @memberof representanteValidations.crearRepresentanteValidations
+         * @type {import('express-validator').ValidationChain}
+         */
+        body('departamento')
+            .optional({ nullable: true, checkFalsy: true })
+            .isString().withMessage('El departamento debe ser texto.')
+            .matches(/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/).withMessage('El departamento contiene caracteres no permitidos. Solo se permiten letras y espacios.'),
+
+        /**
+         * @description Valida el campo `estado_civil`.
+         * - Es opcional (permite `null`, `undefined` o cadena vacía).
+         * - Si está presente, debe ser una cadena de texto.
+         * - Si está presente, solo puede contener letras (incluyendo acentos y 'ñ') y espacios.
+         * @name estado_civil
+         * @memberof representanteValidations.crearRepresentanteValidations
+         * @type {import('express-validator').ValidationChain}
+         */
+        body('estado_civil')
+            .optional({ nullable: true, checkFalsy: true })
+            .isString().withMessage('El estado civil debe ser texto.')
+            .matches(/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/).withMessage('El estado civil contiene caracteres no permitidos. Solo se permiten letras y espacios.')
+    ],
+
+    /**
+     * @description Validaciones para la edición de un representante existente.
+     * Valida el ID del representante en los parámetros de ruta y todos los campos del cuerpo
+     * como opcionales, permitiendo actualizaciones parciales.
+     * @type {Array&lt;import('express-validator').ValidationChain>}
+     */
+    editarRepresentanteValidations: [
+        /**
+         * @description Valida el parámetro de ruta `id_representante`.
+         * - Debe ser un número entero positivo (mayor o igual a 1).
+         * @name id_representante
+         * @memberof representanteValidations.editarRepresentanteValidations
+         * @type {import('express-validator').ValidationChain}
+         */
+        param('id_representante')
+            .isInt({ min: 1 }).withMessage('El ID del representante debe ser un entero positivo.'),
+
+        /**
+         * @description Valida el campo `id_estudiante` (opcional).
+         * - Es opcional (permite `null`, `undefined` o cadena vacía).
+         * - Si está presente, debe ser un número entero positivo.
+         * @name id_estudiante
+         * @memberof representanteValidations.editarRepresentanteValidations
+         * @type {import('express-validator').ValidationChain}
+         */
+        body('id_estudiante')
+            .optional({ nullable: true, checkFalsy: true })
+            .isInt({ min: 1 }).withMessage('El ID del estudiante debe ser un entero positivo.'),
+
+        /**
+         * @description Valida el campo `nombre_repre` (opcional).
+         * - Es opcional (permite `null`, `undefined` o cadena vacía).
+         * - Si está presente, no puede estar vacío.
+         * - Si está presente, debe ser una cadena de texto.
+         * - Si está presente, solo puede contener letras (incluyendo acentos y 'ñ') y espacios simples.
+         * @name nombre_repre
+         * @memberof representanteValidations.editarRepresentanteValidations
+         * @type {import('express-validator').ValidationChain}
+         */
+        body('nombre_repre')
+            .optional({ nullable: true, checkFalsy: true })
+            .notEmpty().withMessage('El nombre del representante no puede estar vacío si se proporciona.')
+            .isString().withMessage('El nombre del representante debe ser texto.')
+            .matches(/^(?!.*\s{2})[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/).withMessage('El nombre del representante solo puede contener letras y espacios (no más de un espacio consecutivo).'),
+
+        /**
+         * @description Valida el campo `parentesco` (opcional).
+         * - Es opcional (permite `null`, `undefined` o cadena vacía).
+         * - Si está presente, no puede estar vacío.
+         * - Si está presente, debe ser una cadena de texto.
+         * - Si está presente, solo puede contener letras (incluyendo acentos y 'ñ'), espacios, puntos y comas.
+         * @name parentesco
+         * @memberof representanteValidations.editarRepresentanteValidations
+         * @type {import('express-validator').ValidationChain}
+         */
+        body('parentesco')
+            .optional({ nullable: true, checkFalsy: true })
+            .notEmpty().withMessage('El parentesco no puede estar vacío si se proporciona.')
+            .isString().withMessage('El parentesco debe ser texto.')
+            .matches(/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s.,]+$/).withMessage('El parentesco contiene caracteres no permitidos. Solo se permiten letras, espacios, puntos y comas.'),
+
+        /**
+         * @description Valida el campo `cedula_repre` (opcional).
+         * - Es opcional (permite `null`, `undefined` o cadena vacía).
+         * - Si está presente, no puede estar vacío.
+         * - Si está presente, debe ser una cadena de texto.
+         * - Si está presente, debe seguir el formato `V-XXXXXXXX` o `E-XXXXXXXX` (donde X son dígitos).
+         * - La parte numérica debe tener entre 7 y 15 dígitos.
+         * @name cedula_repre
+         * @memberof representanteValidations.editarRepresentanteValidations
+         * @type {import('express-validator').ValidationChain}
+         */
+        body('cedula_repre')
+            .optional({ nullable: true, checkFalsy: true })
+            .notEmpty().withMessage('La cédula del representante no puede estar vacía si se proporciona.')
+            .isString().withMessage('La cédula del representante debe ser texto.')
+            .matches(/^[VE]-\d{7,15}$/).withMessage('La cédula debe seguir el formato V-XXXXXXXX o E-XXXXXXXX, con 7 a 15 dígitos.'),
+
+        /**
+         * @description Valida el campo `telefono_repre` (opcional).
+         * - Es opcional (permite `null`, `undefined` o cadena vacía).
+         * - Si está presente, debe ser una cadena de texto.
+         * - Si está presente, solo puede contener dígitos.
+         * - Si está presente, debe tener entre 7 y 15 caracteres.
+         * @name telefono_repre
+         * @memberof representanteValidations.editarRepresentanteValidations
+         * @type {import('express-validator').ValidationChain}
+         */
+        body('telefono_repre')
+            .optional({ nullable: true, checkFalsy: true })
+            .isString().withMessage('El teléfono del representante debe ser texto.')
+            .matches(/^\d+$/).withMessage('El teléfono del representante solo puede contener dígitos.')
+            .isLength({ min: 7, max: 15 }).withMessage('El teléfono del representante debe tener entre 7 y 15 dígitos.'),
+
+        /**
+         * @description Valida el campo `correo_repre` (opcional).
+         * - Es opcional (permite `null`, `undefined` o cadena vacía).
+         * - Si está presente, debe ser una dirección de correo electrónico válida.
+         * @name correo_repre
+         * @memberof representanteValidations.editarRepresentanteValidations
+         * @type {import('express-validator').ValidationChain}
+         */
+        body('correo_repre')
+            .optional({ nullable: true, checkFalsy: true })
+            .isEmail().withMessage('El correo del representante debe ser una dirección de correo válida.'),
+
+        /**
+         * @description Valida el campo `lugar_nacimiento` (opcional).
+         * - Es opcional (permite `null`, `undefined` o cadena vacía).
+         * - Si está presente, debe ser una cadena de texto.
+         * - Si está presente, solo puede contener letras, números, espacios, puntos, comas, dos puntos, comillas y guiones.
+         * @name lugar_nacimiento
+         * @memberof representanteValidations.editarRepresentanteValidations
+         * @type {import('express-validator').ValidationChain}
+         */
+        body('lugar_nacimiento')
+            .optional({ nullable: true, checkFalsy: true })
+            .isString().withMessage('El lugar de nacimiento debe ser texto.')
+            .matches(/^[a-zA-Z0-9áéíóúÁÉÍÓÚñÑ\s.,;:'"()\-]+$/).withMessage('El lugar de nacimiento contiene caracteres no permitidos.'),
+
+        /**
+         * @description Valida el campo `fecha_nacimiento` (opcional).
+         * - Es opcional (permite `null`, `undefined` o cadena vacía).
+         * - Si está presente, debe ser una fecha válida en formato ISO 8601 (YYYY-MM-DD).
+         * - Se convierte a un objeto `Date`.
+         * @name fecha_nacimiento
+         * @memberof representanteValidations.editarRepresentanteValidations
+         * @type {import('express-validator').ValidationChain}
+         */
+        body('fecha_nacimiento')
+            .optional({ nullable: true, checkFalsy: true })
+            .isISO8601().toDate().withMessage('La fecha de nacimiento debe ser una fecha válida en formato YYYY-MM-DD.'),
+
+        /**
+         * @description Valida el campo `direccion` (opcional).
+         * - Es opcional (permite `null`, `undefined` o cadena vacía).
+         * - Si está presente, debe ser una cadena de texto.
+         * - Si está presente, solo puede contener letras, números, espacios, puntos, comas, dos puntos, comillas y guiones.
+         * @name direccion
+         * @memberof representanteValidations.editarRepresentanteValidations
+         * @type {import('express-validator').ValidationChain}
+         */
+        body('direccion')
+            .optional({ nullable: true, checkFalsy: true })
+            .isString().withMessage('La dirección debe ser texto.')
+            .matches(/^[a-zA-Z0-9áéíóúÁÉÍÓÚñÑ\s.,;:'"()\-]+$/).withMessage('La dirección contiene caracteres no permitidos.'),
+
+        /**
+         * @description Valida el campo `ocupacion` (opcional).
+         * - Es opcional (permite `null`, `undefined` o cadena vacía).
+         * - Si está presente, debe ser una cadena de texto.
+         * - Si está presente, solo puede contener letras (incluyendo acentos y 'ñ'), espacios, puntos y comas.
+         * @name ocupacion
+         * @memberof representanteValidations.editarRepresentanteValidations
+         * @type {import('express-validator').ValidationChain}
+         */
+        body('ocupacion')
+            .optional({ nullable: true, checkFalsy: true })
+            .isString().withMessage('La ocupación debe ser texto.')
+            .matches(/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s.,]+$/).withMessage('La ocupación contiene caracteres no permitidos. Solo se permiten letras, espacios, puntos y comas.'),
+
+        /**
+         * @description Valida el campo `lugar_trabajo` (opcional).
+         * - Es opcional (permite `null`, `undefined` o cadena vacía).
+         * - Si está presente, debe ser una cadena de texto.
+         * - Si está presente, solo puede contener letras, números, espacios, puntos, comas, dos puntos, comillas y guiones.
+         * @name lugar_trabajo
+         * @memberof representanteValidations.editarRepresentanteValidations
+         * @type {import('express-validator').ValidationChain}
+         */
+        body('lugar_trabajo')
+            .optional({ nullable: true, checkFalsy: true })
+            .isString().withMessage('El lugar de trabajo debe ser texto.')
+            .matches(/^[a-zA-Z0-9áéíóúÁÉÍÓÚñÑ\s.,;:'"()\-]+$/).withMessage('El lugar de trabajo contiene caracteres no permitidos.'),
+
+        /**
+         * @description Valida el campo `estado` (opcional).
+         * - Es opcional (permite `null`, `undefined` o cadena vacía).
+         * - Si está presente, debe ser una cadena de texto.
+         * - Si está presente, solo puede contener letras (incluyendo acentos y 'ñ') y espacios.
+         * @name estado
+         * @memberof representanteValidations.editarRepresentanteValidations
+         * @type {import('express-validator').ValidationChain}
+         */
+        body('estado')
+            .optional({ nullable: true, checkFalsy: true })
+            .isString().withMessage('El estado debe ser texto.')
+            .matches(/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/).withMessage('El estado contiene caracteres no permitidos. Solo se permiten letras y espacios.'),
+
+        /**
+         * @description Valida el campo `municipio` (opcional).
+         * - Es opcional (permite `null`, `undefined` o cadena vacía).
+         * - Si está presente, debe ser una cadena de texto.
+         * - Si está presente, solo puede contener letras (incluyendo acentos y 'ñ') y espacios.
+         * @name municipio
+         * @memberof representanteValidations.editarRepresentanteValidations
+         * @type {import('express-validator').ValidationChain}
+         */
+        body('municipio')
+            .optional({ nullable: true, checkFalsy: true })
+            .isString().withMessage('El municipio debe ser texto.')
+            .matches(/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/).withMessage('El municipio contiene caracteres no permitidos. Solo se permiten letras y espacios.'),
+
+        /**
+         * @description Valida el campo `departamento` (opcional).
+         * - Es opcional (permite `null`, `undefined` o cadena vacía).
+         * - Si está presente, debe ser una cadena de texto.
+         * - Si está presente, solo puede contener letras (incluyendo acentos y 'ñ') y espacios.
+         * @name departamento
+         * @memberof representanteValidations.editarRepresentanteValidations
+         * @type {import('express-validator').ValidationChain}
+         */
+        body('departamento')
+            .optional({ nullable: true, checkFalsy: true })
+            .isString().withMessage('El departamento debe ser texto.')
+            .matches(/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/).withMessage('El departamento contiene caracteres no permitidos. Solo se permiten letras y espacios.'),
+
+        /**
+         * @description Valida el campo `estado_civil` (opcional).
+         * - Es opcional (permite `null`, `undefined` o cadena vacía).
+         * - Si está presente, debe ser una cadena de texto.
+         * - Si está presente, solo puede contener letras (incluyendo acentos y 'ñ') y espacios.
+         * @name estado_civil
+         * @memberof representanteValidations.editarRepresentanteValidations
+         * @type {import('express-validator').ValidationChain}
+         */
+        body('estado_civil')
+            .optional({ nullable: true, checkFalsy: true })
+            .isString().withMessage('El estado civil debe ser texto.')
+            .matches(/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/).withMessage('El estado civil contiene caracteres no permitidos. Solo se permiten letras y espacios.')
+    ]
+};</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="controllers_carreras.module_controller.html">controllers/carreras.controller</a></li><li><a href="controllers_citas.module_controller.html">controllers/citas.controller</a></li><li><a href="controllers_discapacidades.module_controller.html">controllers/discapacidades.controller</a></li><li><a href="controllers_facultades.module_controller.html">controllers/facultades.controller</a></li><li><a href="controllers_historialMedico.module_controller.html">controllers/historialMedico.controller</a></li><li><a href="controllers_incidencias.module_controller.html">controllers/incidencias.controller</a></li><li><a href="controllers_reportePsicologico.module_controller.html">controllers/reportePsicologico.controller</a></li><li><a href="controllers_representantes.module_controller.html">controllers/representantes.controller</a></li><li><a href="module-config.html">config</a></li><li><a href="module-db.html">db</a></li><li><a href="module-utilities_formatters.html">utilities/formatters</a></li><li><a href="routes_carreras.module_routes.html">routes/carreras.routes</a></li><li><a href="routes_citas.module_routes.html">routes/citas.routes</a></li><li><a href="routes_discapacidades.module_routes.html">routes/discapacidades.routes</a></li><li><a href="routes_estudiantes.module_routes.html">routes/estudiantes.routes</a></li><li><a href="routes_facultades.module_routes.html">routes/facultades.routes</a></li><li><a href="routes_historialMedico.module_routes.html">routes/historialMedico.routes</a></li><li><a href="routes_incidencias.module_routes.html">routes/incidencias.routes</a></li><li><a href="routes_reportePsicologico.module_routes.html">routes/reportePsicologico.routes</a></li><li><a href="routes_representantes.module_routes.html">routes/representantes.routes</a></li><li><a href="routes_usuarios.module_routes.html">routes/usuarios.routes</a></li><li><a href="validations_carreras.module_validations.html">validations/carreras.validations</a></li><li><a href="validations_citas.module_validations.html">validations/citas.validations</a></li><li><a href="validations_discapacidades.module_validations.html">validations/discapacidades.validations</a></li><li><a href="validations_estudiantes.module_validations.html">validations/estudiantes.validations</a></li><li><a href="validations_facultades.module_validations.html">validations/facultades.validations</a></li><li><a href="validations_historialMedico.module_validations.html">validations/historialMedico.validations</a></li><li><a href="validations_incidencias.module_validations.html">validations/incidencias.validations</a></li><li><a href="validations_reportePsicologico.module_validations.html">validations/reportePsicologico.validations</a></li><li><a href="validations_representantes.module_validations.html">validations/representantes.validations</a></li><li><a href="validations_usuarios.module_validations.html">validations/usuarios.validations</a></li></ul><h3>Namespaces</h3><ul><li><a href="validations_carreras.module_validations-carrerasValidations.html">carrerasValidations</a></li><li><a href="validations_citas.module_validations-citaValidations.html">citaValidations</a></li><li><a href="validations_discapacidades.module_validations-discapacidadValidations.html">discapacidadValidations</a></li><li><a href="validations_estudiantes.module_validations-estudianteValidations.html">estudianteValidations</a></li><li><a href="validations_facultades.module_validations-facultadesValidations.html">facultadesValidations</a></li><li><a href="validations_historialMedico.module_validations-historialMedicoValidations.html">historialMedicoValidations</a></li><li><a href="validations_incidencias.module_validations-incidenciasValidations.html">incidenciasValidations</a></li><li><a href="validations_reportePsicologico.module_validations-reportePsicologicoValidations.html">reportePsicologicoValidations</a></li><li><a href="validations_representantes.module_validations-representanteValidations.html">representanteValidations</a></li><li><a href="validations_usuarios.module_validations-usuarioValidations.html">usuarioValidations</a></li></ul><h3>Global</h3><ul><li><a href="global.html#DELETE">DELETE</a></li><li><a href="global.html#GET">GET</a></li><li><a href="global.html#POST">POST</a></li><li><a href="global.html#PUT">PUT</a></li><li><a href="global.html#app">app</a></li><li><a href="global.html#crearEstudiante">crearEstudiante</a></li><li><a href="global.html#editarEstudiante">editarEstudiante</a></li><li><a href="global.html#eliminarEstudiante">eliminarEstudiante</a></li><li><a href="global.html#obtenerEstudiantePorId">obtenerEstudiantePorId</a></li><li><a href="global.html#obtenerEstudiantes">obtenerEstudiantes</a></li><li><a href="global.html#sql">sql</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Tue Jul 01 2025 16:26:15 GMT-0400 (hora de Venezuela)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

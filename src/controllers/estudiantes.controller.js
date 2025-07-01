@@ -3,7 +3,7 @@ import { sql } from '../db.js'; // Se importa el objeto de conexión a la base d
 
 // Se importan las funciones de utilidad para el formateo de cadenas de texto.
 import { toCapitalCase, toLowerCase } from '../utilities/formatters.js';
-
+// eric
 /**
  * @function obtenerEstudiantes
  * @description Obtiene y devuelve una lista de todos los estudiantes, incluyendo información

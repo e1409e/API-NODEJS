@@ -1,0 +1,18 @@
+{
+  "source": {
+    "include": ["./src"],
+    "includePattern": ".js$",
+    "excludePattern": "(node_modules/|docs/)"
+  },
+  "plugins": [],
+  "templates": {
+    "cleverLinks": true,
+    "monospaceLinks": true
+  },
+  "opts": {
+    "encoding": "utf8",
+    "destination": "./docs/",
+    "recurse": true,
+    "template": "node_modules/jsdoc/templates/default"
+  }
+}

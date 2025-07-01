@@ -1,12 +1,31 @@
-import { validationResult } from 'express-validator';
-import { sql } from '../db.js';  // Asegúrate de que la ruta a tu conexión a la base de datos es correcta
-import { discapacidadValidations } from '../validations/discapacidades.validations.js'; //  Asegúrate de crear este archivo de validaciones
+/**
+ * @file Este archivo contiene los controladores para la gestión de discapacidades.
+ * @description Implementa la lógica de negocio para obtener, crear, actualizar y eliminar
+ * registros de discapacidades, interactuando con la base de datos y utilizando
+ * las validaciones definidas para asegurar la integridad de los datos.
+ * @author Eric
+ * @version 1.0.0
+ * @module controllers/discapacidades.controller
+ * @see {@link module:validations/discapacidades.validations} Para las reglas de validación de datos.
+ * @see {@link module:db} Para la conexión a la base de datos.
+ */
 
-// Función para obtener todas las discapacidades
-// Se agrega ORDER BY discapacidad ASC para devolver los registros en orden alfabético
+import { validationResult } from 'express-validator';
+import { sql } from '../db.js';
+import { discapacidadValidations } from '../validations/discapacidades.validations.js';
+
+/**
+ * @description Obtiene todas las discapacidades registradas en el sistema.
+ * Los resultados se ordenan por `discapacidad` de forma ascendente.
+ * @param {object} req - Objeto de solicitud de Express.
+ * @param {object} res - Objeto de respuesta de Express.
+ * @returns {Promise<void>} Responde con un array de objetos de discapacidad o un mensaje de error.
+ * @method GET
+ * @route /discapacidades
+ */
 export const obtenerDiscapacidades = async (req, res) => {
     try {
-        const discapacidades = await req.sql`
+        const discapacidades = await sql`
             SELECT * FROM discapacidades
             ORDER BY discapacidad ASC
         `;
@@ -17,12 +36,26 @@ export const obtenerDiscapacidades = async (req, res) => {
     }
 };
 
-// Función para obtener una discapacidad por ID
-// No es necesario ORDER BY aquí porque solo se busca por ID único
+/**
+ * @description Obtiene una discapacidad específica por su ID.
+ * Aplica validación al parámetro `discapacidad_id` antes de la consulta.
+ * @param {object} req - Objeto de solicitud de Express. Se espera `req.params.discapacidad_id`.
+ * @param {object} res - Objeto de respuesta de Express.
+ * @returns {Promise<void>} Responde con un objeto de discapacidad o un mensaje de error 404 si no se encuentra.
+ * @method GET
+ * @route /discapacidades/:discapacidad_id
+ */
 export const obtenerDiscapacidadPorId = async (req, res) => {
+    // Ejecuta la validación del parámetro discapacidad_id
+    await Promise.all(discapacidadValidations.editarDiscapacidadValidations.filter(v => v.builder.fields.includes('discapacidad_id')).map(validation => validation.run(req)));
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+    }
+
     try {
         const { discapacidad_id } = req.params;
-        const discapacidad = await req.sql`
+        const discapacidad = await sql`
             SELECT * FROM discapacidades WHERE discapacidad_id = ${discapacidad_id}
         `;
 
@@ -37,12 +70,22 @@ export const obtenerDiscapacidadPorId = async (req, res) => {
     }
 };
 
-// Función para crear una nueva discapacidad
+/**
+ * @description Crea una nueva discapacidad en la base de datos.
+ * Aplica las validaciones definidas en `discapacidadValidations.crearDiscapacidadValidations`
+ * para asegurar la integridad de los datos recibidos.
+ * @param {object} req - Objeto de solicitud de Express. Se espera `req.body.discapacidad`.
+ * @param {object} res - Objeto de respuesta de Express.
+ * @returns {Promise<void>} Responde con el objeto de la discapacidad creada o con errores de validación/servidor.
+ * @method POST
+ * @route /discapacidades
+ */
 export const crearDiscapacidad = async (req, res) => {
-    // Validaciones
+    // Ejecuta todas las validaciones definidas para la creación de discapacidad.
     await Promise.all(discapacidadValidations.crearDiscapacidadValidations.map(validation => validation.run(req)));
 
     const errors = validationResult(req);
+    // Si hay errores de validación, devuelve una respuesta 400 con los detalles de los errores.
     if (!errors.isEmpty()) {
         return res.status(400).json({ errors: errors.array() });
     }
@@ -50,13 +93,7 @@ export const crearDiscapacidad = async (req, res) => {
     try {
         const { discapacidad } = req.body;
 
-        // Verificar que la conexión SQL está correctamente definida
-        if (!req.sql) {
-            throw new Error("No se encontró la conexión SQL en req.sql");
-        }
-
-        // Ejecutar la consulta SQL
-        const nuevaDiscapacidad = await req.sql`
+        const nuevaDiscapacidad = await sql`
             SELECT insertar_discapacidad(
                 ${discapacidad}
             ) as discapacidad;
@@ -74,11 +111,22 @@ export const crearDiscapacidad = async (req, res) => {
     }
 };
 
-// Función para editar una discapacidad existente
+/**
+ * @description Actualiza un registro de discapacidad existente en la base de datos por su ID.
+ * Aplica las validaciones definidas en `discapacidadValidations.editarDiscapacidadValidations`
+ * para el ID de la discapacidad y el campo a actualizar.
+ * @param {object} req - Objeto de solicitud de Express. Se espera `req.params.discapacidad_id` y `req.body.discapacidad`.
+ * @param {object} res - Objeto de respuesta de Express.
+ * @returns {Promise<void>} Responde con un mensaje de éxito o con errores de validación/servidor.
+ * @method PUT
+ * @route /discapacidades/:discapacidad_id
+ */
 export const editarDiscapacidad = async (req, res) => {
+    // Ejecuta todas las validaciones definidas para la edición de discapacidad.
     await Promise.all(discapacidadValidations.editarDiscapacidadValidations.map(validation => validation.run(req)));
 
     const errors = validationResult(req);
+    // Si hay errores de validación, devuelve una respuesta 400 con los detalles de los errores.
     if (!errors.isEmpty()) {
         return res.status(400).json({ errors: errors.array() });
     }
@@ -87,13 +135,14 @@ export const editarDiscapacidad = async (req, res) => {
         const { discapacidad_id } = req.params;
         const { discapacidad } = req.body;
 
-        const discapacidadEditada = await req.sql`
+        const discapacidadEditada = await sql`
             SELECT editar_discapacidad(
                 ${discapacidad_id},
                 ${discapacidad}
             ) as success
         `;
 
+        // Si la función de la DB indica que no se pudo actualizar (ej. discapacidad no encontrada), devuelve 404.
         if (!discapacidadEditada.length || !discapacidadEditada[0].success) {
             return res.status(404).json({ error: 'Discapacidad no encontrada o no se pudo actualizar' });
         }
@@ -105,15 +154,31 @@ export const editarDiscapacidad = async (req, res) => {
     }
 };
 
-// Función para eliminar una discapacidad
+/**
+ * @description Elimina un registro de discapacidad de la base de datos por su ID.
+ * Aplica validación al parámetro `discapacidad_id`.
+ * @param {object} req - Objeto de solicitud de Express. Se espera `req.params.discapacidad_id`.
+ * @param {object} res - Objeto de respuesta de Express.
+ * @returns {Promise<void>} Responde con un mensaje de éxito o con errores de validación/servidor.
+ * @method DELETE
+ * @route /discapacidades/:discapacidad_id
+ */
 export const eliminarDiscapacidad = async (req, res) => {
+    // Ejecuta la validación del parámetro discapacidad_id
+    await Promise.all(discapacidadValidations.editarDiscapacidadValidations.filter(v => v.builder.fields.includes('discapacidad_id')).map(validation => validation.run(req)));
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+    }
+
     try {
         const { discapacidad_id } = req.params;
 
-        const discapacidadEliminada = await req.sql`
+        const discapacidadEliminada = await sql`
             SELECT eliminar_discapacidad(${discapacidad_id}) as success
         `;
 
+        // Si la función de la DB indica que no se pudo eliminar (ej. discapacidad no encontrada), devuelve 404.
         if (!discapacidadEliminada.length || !discapacidadEliminada[0].success) {
             return res.status(404).json({ error: 'Discapacidad no encontrada o no se pudo eliminar' });
         }
