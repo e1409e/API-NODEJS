@@ -1,40 +1,30 @@
+import dotenv from 'dotenv';
+dotenv.config();
+
+import { neon } from '@neondatabase/serverless';
+import { getDatabaseUrl, DB_SOURCE, NEON_DATABASE_URL, DB_HOST, DB_USER, DB_PASSWORD, DB_DATABASE, DB_PORT } from './config.js';
+
 /**
- * @file Este archivo configura la conexión a la base de datos PostgreSQL utilizando el cliente Neon.
- * @description Se encarga de cargar las variables de entorno y establecer la instancia de conexión
- * que será utilizada por el resto de la aplicación para interactuar con la base de datos.
+ * @file Configura la conexión a la base de datos PostgreSQL usando Neon o local según configuración.
+ * @description Permite alternar entre NeonDB y una base de datos local usando la función getDatabaseUrl().
  * @author Eric
- * @version 1.0.0
+ * @version 1.1.0
  * @module db
  */
 
-// Importaciones y configuración de la base de datos
-// -------------------------------------------------
+const dbUrl = getDatabaseUrl();
+if (!dbUrl) {
+  throw new Error('No se ha definido la cadena de conexión a la base de datos. Verifica tu archivo .env');
+}
 
-import { neon } from '@neondatabase/serverless'; // Se importa el cliente Neon, necesario para interactuar con bases de datos alojadas en Neon.
-import dotenv from 'dotenv'; // Se importa dotenv, un módulo que permite cargar variables de entorno desde el archivo .env del proyecto.
+export const sql = neon(dbUrl);
 
-// Cargar variables de entorno
-// ---------------------------
-/**
- * @description La función `dotenv.config()` es invocada para cargar todas las variables definidas
- * en el archivo `.env` del directorio raíz del proyecto en `process.env`.
- * Esto es crucial para acceder de forma segura a la URL de conexión de la base de datos,
- * evitando que credenciales sensibles se codifiquen directamente en el código fuente.
- * @function
- */
-dotenv.config();
-
-// Inicializar y exportar la conexión a la base de datos
-// ----------------------------------------------------
-/**
- * @description Se crea una instancia de conexión a la base de datos de Neon.
- * La URL de conexión se obtiene de `process.env.DATABASE_URL`, la cual debe estar
- * configurada en el archivo `.env` (ejemplo: `DATABASE_URL="postgres://usuario:contraseña@host:puerto/bd"`).
- * Esta instancia de conexión, nombrada `sql`, se exporta para que pueda ser
- * importada y utilizada por otros módulos de la aplicación que necesiten
- * realizar consultas o interacciones con la base de datos.
- * @type {function}
- * @constant
- * @see {@link https://neon.tech/} Para más información sobre Neon Database.
- */
-export const sql = neon(process.env.DATABASE_URL);
+if ((DB_SOURCE || '').trim().toLowerCase() === 'neon') {
+  console.log(`Conectado a NeonDB correctamente: ${NEON_DATABASE_URL}`);
+} else {
+  console.log(`Conectado a PostgreSQL local correctamente:`);
+  console.log(`Host: ${DB_HOST}`);
+  console.log(`Usuario: ${DB_USER}`);
+  console.log(`Base de datos: ${DB_DATABASE}`);
+  console.log(`Puerto: ${DB_PORT}`);
+}

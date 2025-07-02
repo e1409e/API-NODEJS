@@ -1,6 +1,6 @@
 /**
  * @file Este es el archivo principal de la aplicación API RESTful.
- * @description Configura el servidor Express, establece la conexión con la base de datos PostgreSQL (Neon),
+ * @description Configura el servidor Express, establece la conexión con la base de datos PostgreSQL (Neon o local),
  * configura los middlewares necesarios (CORS, JSON parsing), inyecta la conexión a la base de datos
  * en el objeto de solicitud, y define y monta todas las rutas de la API.
  * También incluye un endpoint de ejemplo para verificar la conexión a la base de datos.
@@ -21,6 +21,9 @@ import { DB_USER, DB_HOST, DB_PASSWORD, DB_DATABASE, DB_PORT } from './config.js
 import { neon } from '@neondatabase/serverless'; // Importa el cliente Neon para conectar con la base de datos de Neon.
 import dotenv from 'dotenv'; // Importa dotenv para cargar variables de entorno desde el archivo .env.
 import cors from 'cors'; // Importa CORS (Cross-Origin Resource Sharing) para manejar las políticas de seguridad de origen cruzado.
+
+// Importar la instancia de conexión a la base de datos según configuración
+import { sql } from './db.js';
 
 // Importar las rutas de la API
 // ----------------------------
@@ -46,22 +49,13 @@ import facultadesRoutes from './routes/facultades.routes.js';
  */
 dotenv.config();
 
-// Inicialización de la aplicación Express y la conexión a la base de datos
+// Inicialización de la aplicación Express
 // -----------------------------------------------------------------------
 /**
  * @description Instancia principal de la aplicación Express.
  * @type {express.Application}
  */
 const app = express();
-
-/**
- * @description Instancia del cliente de conexión a la base de datos Neon.
- * Se inicializa utilizando la URL de conexión obtenida de las variables de entorno.
- * Esta instancia se utiliza para ejecutar consultas SQL en la base de datos.
- * @type {function}
- * @see {@link https://neon.tech/} Para más información sobre Neon Database.
- */
-const sql = neon(process.env.DATABASE_URL);
 
 // Configuración de Middlewares
 // ---------------------------

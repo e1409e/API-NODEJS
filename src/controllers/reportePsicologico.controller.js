@@ -219,13 +219,6 @@ export const eliminarReportePsicologico = async (req, res) => {
  * @route /reportes_psicologicos/estudiante/:id_estudiante
  */
 export const obtenerReportesPsicologicosPorEstudiante = async (req, res) => {
-    // Ejecuta la validación del parámetro id_estudiante
-    await Promise.all(reportePsicologicoValidations.crearReportePsicologicoValidations.filter(v => v.builder.fields.includes('id_estudiante')).map(validation => validation.run(req)));
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-        return res.status(400).json({ errors: errors.array() });
-    }
-
     try {
         const { id_estudiante } = req.params;
         const reportes = await sql`

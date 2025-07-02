@@ -113,6 +113,7 @@ export const crearDiscapacidad = async (req, res) => {
 
 /**
  * @description Actualiza un registro de discapacidad existente en la base de datos por su ID.
+ * Utiliza el procedimiento editar_discapacidad(p_discapacidad_id, p_discapacidad) que retorna boolean.
  * Aplica las validaciones definidas en `discapacidadValidations.editarDiscapacidadValidations`
  * para el ID de la discapacidad y el campo a actualizar.
  * @param {object} req - Objeto de solicitud de Express. Se espera `req.params.discapacidad_id` y `req.body.discapacidad`.
@@ -135,15 +136,15 @@ export const editarDiscapacidad = async (req, res) => {
         const { discapacidad_id } = req.params;
         const { discapacidad } = req.body;
 
-        const discapacidadEditada = await sql`
+        const result = await sql`
             SELECT editar_discapacidad(
-                ${discapacidad_id},
-                ${discapacidad}
+                ${discapacidad_id}::integer,
+                ${discapacidad}::varchar
             ) as success
         `;
 
         // Si la función de la DB indica que no se pudo actualizar (ej. discapacidad no encontrada), devuelve 404.
-        if (!discapacidadEditada.length || !discapacidadEditada[0].success) {
+        if (!result.length || !result[0].success) {
             return res.status(404).json({ error: 'Discapacidad no encontrada o no se pudo actualizar' });
         }
 

@@ -13,6 +13,7 @@
 import { validationResult } from 'express-validator';
 import { sql } from '../db.js';
 import { representanteValidations } from '../validations/representantes.validations.js';
+import { toCapitalCase } from '../utilities/formatters.js'; // <-- Importa el formateador
 
 /**
  * @description Obtiene todos los representantes registrados en el sistema.
@@ -80,16 +81,22 @@ export const obtenerRepresentantePorId = async (req, res) => {
  * @route /representantes/estudiante/:id_estudiante
  */
 export const obtenerRepresentantePorEstudiante = async (req, res) => {
-    // Ejecuta la validación del parámetro id_estudiante
-    // Reutilizamos la validación de id_estudiante de crearRepresentanteValidations
-    await Promise.all(representanteValidations.crearRepresentanteValidations.filter(v => v.builder.fields.includes('id_estudiante')).map(validation => validation.run(req)));
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-        return res.status(400).json({ errors: errors.array() });
+    // Si quieres validar que el parámetro es un entero positivo, hazlo aquí manualmente:
+    const { id_estudiante } = req.params;
+    if (!id_estudiante || isNaN(id_estudiante) || parseInt(id_estudiante) < 1) {
+        return res.status(400).json({
+            errors: [
+                {
+                    type: "field",
+                    msg: "El ID del estudiante debe ser un entero positivo.",
+                    path: "id_estudiante",
+                    location: "params"
+                }
+            ]
+        });
     }
 
     try {
-        const { id_estudiante } = req.params;
         const representante = await sql`
             SELECT r.*, e.nombres AS nombre_estudiante, e.apellidos AS apellido_estudiante
             FROM representantes r
@@ -119,17 +126,15 @@ export const obtenerRepresentantePorEstudiante = async (req, res) => {
  * @route /representantes
  */
 export const crearRepresentante = async (req, res) => {
-    // Ejecuta todas las validaciones definidas para la creación de representante.
     await Promise.all(representanteValidations.crearRepresentanteValidations.map(validation => validation.run(req)));
 
     const errors = validationResult(req);
-    // Si hay errores de validación, devuelve una respuesta 400 con los detalles de los errores.
     if (!errors.isEmpty()) {
         return res.status(400).json({ errors: errors.array() });
     }
 
     try {
-        const {
+        let {
             id_estudiante,
             nombre_repre,
             parentesco,
@@ -147,7 +152,11 @@ export const crearRepresentante = async (req, res) => {
             estado_civil
         } = req.body;
 
-        // Llama a una función almacenada en la base de datos para insertar el nuevo representante.
+        // Formatea los campos a Capital Case
+        nombre_repre = toCapitalCase(nombre_repre);
+        lugar_nacimiento = toCapitalCase(lugar_nacimiento);
+        estado = toCapitalCase(estado);
+
         const nuevoRepresentante = await sql`
             SELECT insertar_representante(
                 ${id_estudiante},
@@ -168,7 +177,6 @@ export const crearRepresentante = async (req, res) => {
             ) as representante;
         `;
 
-        // Verificar que se haya retornado un representante válido
         if (!nuevoRepresentante.length || !nuevoRepresentante[0].representante) {
             throw new Error("Error al guardar el representante en la base de datos");
         }
@@ -202,7 +210,7 @@ export const editarRepresentante = async (req, res) => {
 
     try {
         const { id_representante } = req.params;
-        const {
+        let {
             id_estudiante,
             nombre_repre,
             parentesco,
@@ -220,6 +228,11 @@ export const editarRepresentante = async (req, res) => {
             estado_civil
         } = req.body;
 
+        // Aplica formato solo si los campos existen en el body
+        if (nombre_repre) nombre_repre = toCapitalCase(nombre_repre);
+        if (lugar_nacimiento) lugar_nacimiento = toCapitalCase(lugar_nacimiento);
+        if (estado) estado = toCapitalCase(estado);
+
         // Llama a una función almacenada en la base de datos para editar el representante.
         const representanteEditado = await sql`
             SELECT editar_representante(
@@ -227,6 +240,7 @@ export const editarRepresentante = async (req, res) => {
                 ${id_estudiante || null},
                 ${nombre_repre || null},
                 ${parentesco || null},
+                ${cedula_repre || null},
                 ${telefono_repre || null},
                 ${correo_repre || null},
                 ${lugar_nacimiento || null},

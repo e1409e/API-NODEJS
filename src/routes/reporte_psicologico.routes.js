@@ -86,8 +86,6 @@ router.get(
  */
 router.get(
     '/estudiante/:id_estudiante',
-    reportePsicologicoValidations.crearReportePsicologicoValidations.filter(v => v.builder.fields.includes('id_estudiante')), // Filtra para solo validar el parámetro
-    validar,
     obtenerReportesPsicologicosPorEstudiante
 );
 

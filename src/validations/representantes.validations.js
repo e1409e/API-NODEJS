@@ -49,7 +49,7 @@ export const representanteValidations = {
         body('nombre_repre')
             .notEmpty().withMessage('El nombre del representante es requerido.')
             .isString().withMessage('El nombre del representante debe ser texto.')
-            .matches(/^(?!.*\s{2})[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/).withMessage('El nombre del representante solo puede contener letras y espacios (no más de un espacio consecutivo).'),
+            .matches(/^(?!.*\s{2})[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/).withMessage('El nombre del representante solo puede contener letras.'),
 
         /**
          * @description Valida el campo `parentesco`.
@@ -63,7 +63,7 @@ export const representanteValidations = {
         body('parentesco')
             .notEmpty().withMessage('El parentesco es requerido.')
             .isString().withMessage('El parentesco debe ser texto.')
-            .matches(/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s.,]+$/).withMessage('El parentesco contiene caracteres no permitidos. Solo se permiten letras, espacios, puntos y comas.'),
+            .matches(/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s.,]+$/).withMessage('El parentesco contiene caracteres no permitidos, solo se permiten letras.'),
 
         /**
          * @description Valida el campo `cedula_repre`.

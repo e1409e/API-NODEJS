@@ -11,7 +11,7 @@
  */
 
 import express from 'express';
-import { validationResult } from 'express-validator'; // Se importa la función 'validationResult' para recopilar errores de validación.
+import { validationResult } from 'express-validator';
 
 import {
     obtenerRepresentantes,
@@ -22,12 +22,8 @@ import {
     obtenerRepresentantePorEstudiante
 } from '../controllers/representantes.controller.js';
 
-import { representanteValidations } from '../validations/representantes.validations.js'; // Importa las validaciones de representantes
+import { representanteValidations } from '../validations/representantes.validations.js';
 
-/**
- * @description Instancia de Express Router para gestionar las rutas de representantes.
- * @type {express.Router}
- */
 const router = express.Router();
 
 /**
@@ -59,35 +55,25 @@ router.get('/', obtenerRepresentantes);
 
 /**
  * @description Ruta para obtener la información de un representante específico por su ID.
- * Aplica validación al parámetro `id_representante`.
  * @method GET
  * @route /representantes/:id_representante
  * @param {string} :id_representante - ID único del representante a buscar.
- * @param {Array<import('express-validator').ValidationChain>} representanteValidations.editarRepresentanteValidations - Middlewares de validación para el ID del representante (solo el parámetro).
- * @param {function} validar - Middleware para manejar los resultados de la validación.
  * @param {function} obtenerRepresentantePorId - Controlador que maneja la lógica para obtener un representante por ID.
  */
 router.get(
     '/:id_representante',
-    representanteValidations.editarRepresentanteValidations.filter(v => v.builder.fields.includes('id_representante')), // Filtra para solo validar el parámetro
-    validar,
     obtenerRepresentantePorId
 );
 
 /**
  * @description Ruta para obtener un representante por el ID del estudiante asociado.
- * Aplica validación al parámetro `id_estudiante`.
  * @method GET
  * @route /representantes/estudiante/:id_estudiante
  * @param {string} :id_estudiante - ID único del estudiante para buscar su representante.
- * @param {Array<import('express-validator').ValidationChain>} representanteValidations.crearRepresentanteValidations - Middlewares de validación para el ID del estudiante (solo el parámetro).
- * @param {function} validar - Middleware para manejar los resultados de la validación.
  * @param {function} obtenerRepresentantePorEstudiante - Controlador que maneja la lógica para obtener un representante por ID de estudiante.
  */
 router.get(
     '/estudiante/:id_estudiante',
-    representanteValidations.crearRepresentanteValidations.filter(v => v.builder.fields.includes('id_estudiante')), // Filtra para solo validar el parámetro
-    validar,
     obtenerRepresentantePorEstudiante
 );
 
@@ -136,7 +122,7 @@ router.put(
  */
 router.delete(
     '/:id_representante',
-    representanteValidations.editarRepresentanteValidations.filter(v => v.builder.fields.includes('id_representante')), // Filtra para solo validar el parámetro
+    representanteValidations.editarRepresentanteValidations.filter(v => v.builder.fields.includes('id_representante')),
     validar,
     eliminarRepresentante
 );

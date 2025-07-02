@@ -1,57 +1,38 @@
+import dotenv from 'dotenv';
+dotenv.config();
+
 /**
  * @file Este archivo contiene las variables de configuración global de la aplicación.
- * @description Exporta las variables de entorno relacionadas con la conexión a la base de datos
- * y el puerto en el que la aplicación Express escuchará las peticiones.
+ * @description Permite alternar entre diferentes orígenes de base de datos (Neon o local)
+ * según la variable de entorno DB_SOURCE.
  * @author Eric
- * @version 1.0.0
+ * @version 1.1.0
  * @module config
  */
 
-/**
- * @description Usuario de la base de datos.
- * Se obtiene de la variable de entorno `DB_USER`.
- * @type {string}
- * @constant
- */
-export const DB_USER = process.env.DB_USER;
+export const DB_SOURCE = process.env.DB_SOURCE || "neon";
 
-/**
- * @description Host de la base de datos.
- * Se obtiene de la variable de entorno `DB_HOST`.
- * @type {string}
- * @constant
- */
-export const DB_HOST = process.env.DB_HOST;
+// NeonDB
+export const NEON_DATABASE_URL = process.env.NEON_DATABASE_URL;
 
-/**
- * @description Contraseña de la base de datos.
- * Se obtiene de la variable de entorno `DB_PASSWORD`.
- * @type {string}
- * @constant
- */
-export const DB_PASSWORD = process.env.DB_PASSWORD;
+// Local (usa nombres consistentes)
+export const DB_HOST = process.env.LOCAL_DB_HOST;
+export const DB_USER = process.env.LOCAL_DB_USER;
+export const DB_PASSWORD = process.env.LOCAL_DB_PASSWORD;
+export const DB_DATABASE = process.env.LOCAL_DB_NAME;
+export const DB_PORT = process.env.LOCAL_DB_PORT;
 
-/**
- * @description Nombre de la base de datos.
- * Se obtiene de la variable de entorno `DB_DATABASE`.
- * @type {string}
- * @constant
- */
-export const DB_DATABASE = process.env.DB_DATABASE;
-
-/**
- * @description Puerto de la base de datos.
- * Se obtiene de la variable de entorno `DB_PORT`.
- * @type {string} | {number}
- * @constant
- */
-export const DB_PORT = process.env.DB_PORT;
-
-/**
- * @description Puerto en el que la aplicación Express escuchará las peticiones.
- * Se obtiene de la variable de entorno `PORT`. Si `PORT` no está definida,
- * por defecto se utilizará el puerto `3000`.
- * @type {string} | {number}
- * @constant
- */
+// Puerto de la API
 export const PORT = process.env.PORT || 3000;
+
+// JWT
+export const JWT_SECRET = process.env.JWT_SECRET;
+
+// Exporta la URL de conexión final según el origen
+export function getDatabaseUrl() {
+  if ((DB_SOURCE || '').trim().toLowerCase() === "neon") {
+    return NEON_DATABASE_URL;
+  }
+  // Construye la URL para PostgreSQL local usando los nombres consistentes
+  return `postgresql://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_DATABASE}`;
+}
