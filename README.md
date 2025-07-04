@@ -2,7 +2,7 @@
 
 ## 📄 Descripción General
 
-Esta API RESTful permite gestionar información de estudiantes con discapacidad: datos personales, académicos y de contacto.  
+API RESTful para el sistema SMGED que permite gestionar información de estudiantes con discapacidad: datos personales, académicos y de contacto.  
 Desarrollada con **Node.js** y **Express**, utiliza **PostgreSQL** y un diseño modular, con validaciones y saneamiento de datos para garantizar la integridad de la información.
 
 ---
@@ -77,6 +77,7 @@ API-NODEJS/
 |--------------|---------------------------------------------------------|
 | `npm start`  | Inicia la aplicación en modo producción                 |
 | `npm run dev`| Inicia en modo desarrollo con recarga automática        |
+| `npm run docs`| Inicia jsdoc para crear la documentación HTML          |
 
 ---
 

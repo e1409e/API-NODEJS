@@ -16,6 +16,7 @@
     "@neondatabase/serverless": "^1.0.0",
     "bcrypt": "^5.1.1",
     "cors": "^2.8.5",
+    "docdash": "^2.0.2",
     "dotenv": "^16.5.0",
     "express": "^5.1.0",
     "express-validator": "^7.2.1",
@@ -26,6 +27,7 @@
     "pg": "^8.15.6"
   },
   "devDependencies": {
-    "jsdoc": "^4.0.4"
+    "jsdoc": "^4.0.4",
+    "tui-jsdoc-template": "^1.2.2"
   }
 }

@@ -1,3 +1,12 @@
+/**
+ * @file db.js
+ * @module db
+ * @description Configura la conexión a la base de datos PostgreSQL usando Neon o una instancia local, según la configuración del entorno.
+ * @author Eric
+ * @version 1.1.0
+ * @see module:config
+ */
+
 import dotenv from 'dotenv';
 dotenv.config();
 
@@ -5,18 +14,19 @@ import { neon } from '@neondatabase/serverless';
 import { getDatabaseUrl, DB_SOURCE, NEON_DATABASE_URL, DB_HOST, DB_USER, DB_PASSWORD, DB_DATABASE, DB_PORT } from './config.js';
 
 /**
- * @file Configura la conexión a la base de datos PostgreSQL usando Neon o local según configuración.
- * @description Permite alternar entre NeonDB y una base de datos local usando la función getDatabaseUrl().
- * @author Eric
- * @version 1.1.0
- * @module db
+ * Obtiene la URL de conexión a la base de datos según la configuración del entorno.
+ * @type {string}
+ * @throws {Error} Si no se define la cadena de conexión.
  */
-
 const dbUrl = getDatabaseUrl();
 if (!dbUrl) {
   throw new Error('No se ha definido la cadena de conexión a la base de datos. Verifica tu archivo .env');
 }
 
+/**
+ * Instancia de conexión a la base de datos PostgreSQL (Neon o local).
+ * @type {import('@neondatabase/serverless').NeonDbQueryFunction}
+ */
 export const sql = neon(dbUrl);
 
 if ((DB_SOURCE || '').trim().toLowerCase() === 'neon') {

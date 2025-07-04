@@ -4,15 +4,16 @@
     "includePattern": ".js$",
     "excludePattern": "(node_modules/|docs/)"
   },
-  "plugins": [],
+  "plugins": ["plugins/markdown"],
   "templates": {
-    "cleverLinks": true,
-    "monospaceLinks": true
+    "cleverLinks": false,
+    "monospaceLinks": false
   },
   "opts": {
     "encoding": "utf8",
     "destination": "./docs/",
     "recurse": true,
-    "template": "node_modules/jsdoc/templates/default"
+    "template": "node_modules/docdash",
+     "verbose": true
   }
 }
