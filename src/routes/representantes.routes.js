@@ -3,11 +3,13 @@
  * @description Configura los endpoints para realizar operaciones CRUD (Crear, Leer, Actualizar, Eliminar)
  * sobre los representantes. Integra validaciones de datos de entrada utilizando `express-validator`
  * para asegurar la integridad y el formato correcto de la información recibida en las peticiones.
+ * Incorpora autenticación JWT para asegurar que solo usuarios válidos puedan acceder a los recursos.
  * @author Eric
  * @version 1.0.0
  * @module routes/representantes.routes
  * @see {@link module:controllers/representantes.controller} Para la lógica de negocio de cada ruta.
  * @see {@link module:validations/representantes.validations} Para las reglas de validación de datos.
+ * @see {@link module:middlewares/auth.middleware} Para el middleware de autenticación.
  */
 
 import express from 'express';
@@ -23,6 +25,9 @@ import {
 } from '../controllers/representantes.controller.js';
 
 import { representanteValidations } from '../validations/representantes.validations.js';
+
+// Importar el middleware de autenticación
+import { authenticateToken } from '../middlewares/auth.middleware.js';
 
 const router = express.Router();
 
@@ -47,47 +52,58 @@ const validar = (req, res, next) => {
 
 /**
  * @description Ruta para obtener todos los representantes registrados en el sistema.
+ * Requiere autenticación JWT: solo usuarios válidos pueden acceder.
  * @method GET
  * @route /representantes
+ * @param {function} authenticateToken - Middleware para verificar el token JWT.
  * @param {function} obtenerRepresentantes - Controlador que maneja la lógica para obtener todos los representantes.
  */
-router.get('/', obtenerRepresentantes);
+router.get('/', authenticateToken, obtenerRepresentantes);
 
 /**
  * @description Ruta para obtener la información de un representante específico por su ID.
+ * Requiere autenticación JWT: solo usuarios válidos pueden acceder.
  * @method GET
  * @route /representantes/:id_representante
  * @param {string} :id_representante - ID único del representante a buscar.
+ * @param {function} authenticateToken - Middleware para verificar el token JWT.
  * @param {function} obtenerRepresentantePorId - Controlador que maneja la lógica para obtener un representante por ID.
  */
 router.get(
     '/:id_representante',
+    authenticateToken, // Agregado el middleware de autenticación
     obtenerRepresentantePorId
 );
 
 /**
  * @description Ruta para obtener un representante por el ID del estudiante asociado.
+ * Requiere autenticación JWT: solo usuarios válidos pueden acceder.
  * @method GET
  * @route /representantes/estudiante/:id_estudiante
  * @param {string} :id_estudiante - ID único del estudiante para buscar su representante.
+ * @param {function} authenticateToken - Middleware para verificar el token JWT.
  * @param {function} obtenerRepresentantePorEstudiante - Controlador que maneja la lógica para obtener un representante por ID de estudiante.
  */
 router.get(
     '/estudiante/:id_estudiante',
+    authenticateToken, // Agregado el middleware de autenticación
     obtenerRepresentantePorEstudiante
 );
 
 /**
  * @description Ruta para crear un nuevo representante.
+ * Requiere autenticación JWT: solo usuarios válidos pueden acceder.
  * Aplica las validaciones definidas en `crearRepresentanteValidations` antes de ejecutar el controlador.
  * @method POST
  * @route /representantes
+ * @param {function} authenticateToken - Middleware para verificar el token JWT.
  * @param {Array<import('express-validator').ValidationChain>} representanteValidations.crearRepresentanteValidations - Middlewares de validación para la creación de representantes.
  * @param {function} validar - Middleware para manejar los resultados de la validación.
  * @param {function} crearRepresentante - Controlador que maneja la lógica de creación de representante.
  */
 router.post(
     '/',
+    authenticateToken, // Agregado el middleware de autenticación
     representanteValidations.crearRepresentanteValidations,
     validar,
     crearRepresentante
@@ -95,16 +111,19 @@ router.post(
 
 /**
  * @description Ruta para editar un representante existente por su ID.
+ * Requiere autenticación JWT: solo usuarios válidos pueden acceder.
  * Aplica las validaciones definidas en `editarRepresentanteValidations` antes de ejecutar el controlador.
  * @method PUT
  * @route /representantes/:id_representante
  * @param {string} :id_representante - ID único del representante a editar.
+ * @param {function} authenticateToken - Middleware para verificar el token JWT.
  * @param {Array<import('express-validator').ValidationChain>} representanteValidations.editarRepresentanteValidations - Middlewares de validación para la edición de representantes.
  * @param {function} validar - Middleware para manejar los resultados de la validación.
  * @param {function} editarRepresentante - Controlador que maneja la lógica de edición de representante.
  */
 router.put(
     '/:id_representante',
+    authenticateToken, // Agregado el middleware de autenticación
     representanteValidations.editarRepresentanteValidations,
     validar,
     editarRepresentante
@@ -112,16 +131,19 @@ router.put(
 
 /**
  * @description Ruta para eliminar un representante del sistema por su ID.
+ * Requiere autenticación JWT: solo usuarios válidos pueden acceder.
  * Aplica validación al parámetro `id_representante`.
  * @method DELETE
  * @route /representantes/:id_representante
  * @param {string} :id_representante - ID único del representante a eliminar.
+ * @param {function} authenticateToken - Middleware para verificar el token JWT.
  * @param {Array<import('express-validator').ValidationChain>} representanteValidations.editarRepresentanteValidations - Middlewares de validación para el ID del representante (solo el parámetro).
  * @param {function} validar - Middleware para manejar los resultados de la validación.
  * @param {function} eliminarRepresentante - Controlador que maneja la lógica de eliminación de representante.
  */
 router.delete(
     '/:id_representante',
+    authenticateToken, // Agregado el middleware de autenticación
     representanteValidations.editarRepresentanteValidations.filter(v => v.builder.fields.includes('id_representante')),
     validar,
     eliminarRepresentante

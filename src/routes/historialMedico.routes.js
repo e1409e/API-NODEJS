@@ -4,11 +4,13 @@
  * sobre los registros de historial médico, incluyendo la obtención por ID y por ID de estudiante.
  * Integra validaciones de datos de entrada utilizando `express-validator` para asegurar
  * la integridad y el formato correcto de la información recibida en las peticiones.
+ * Incorpora autenticación JWT para asegurar que solo usuarios válidos puedan acceder a los recursos.
  * @author Eric
  * @version 1.0.0
  * @module routes/historialMedico.routes
  * @see {@link module:controllers/historialMedico.controller} Para la lógica de negocio de cada ruta.
  * @see {@link module:validations/historialMedico.validations} Para las reglas de validación de datos.
+ * @see {@link module:middlewares/auth.middleware} Para el middleware de autenticación.
  */
 
 import express from 'express';
@@ -24,6 +26,9 @@ import {
 } from '../controllers/HistorialMedico.controller.js';
 
 import { historialMedicoValidations } from '../validations/historialMedico.validations.js'; // Importa las validaciones de historial médico
+
+// Importar el middleware de autenticación
+import { authenticateToken } from '../middlewares/auth.middleware.js';
 
 /**
  * @description Instancia de Express Router para gestionar las rutas de historial médico.
@@ -52,24 +57,29 @@ const validar = (req, res, next) => {
 
 /**
  * @description Ruta para obtener todos los historiales médicos registrados en el sistema.
+ * Requiere autenticación JWT: solo usuarios válidos pueden acceder.
  * @method GET
  * @route /historial_medico
+ * @param {function} authenticateToken - Middleware para verificar el token JWT.
  * @param {function} obtenerHistorialesMedicos - Controlador que maneja la lógica para obtener todos los historiales médicos.
  */
-router.get('/', obtenerHistorialesMedicos);
+router.get('/', authenticateToken, obtenerHistorialesMedicos);
 
 /**
  * @description Ruta para obtener un historial médico específico por su ID.
+ * Requiere autenticación JWT: solo usuarios válidos pueden acceder.
  * Aplica validación al parámetro `id_historialmedico`.
  * @method GET
  * @route /historial_medico/:id_historialmedico
  * @param {string} :id_historialmedico - ID único del historial médico a buscar.
+ * @param {function} authenticateToken - Middleware para verificar el token JWT.
  * @param {Array<import('express-validator').ValidationChain>} historialMedicoValidations.editarHistorialMedicoValidations[0] - Middleware de validación para el ID del historial médico.
  * @param {function} validar - Middleware para manejar los resultados de la validación.
  * @param {function} obtenerHistorialMedicoPorId - Controlador que maneja la lógica para obtener un historial médico por ID.
  */
 router.get(
     '/:id_historialmedico',
+    authenticateToken, // Agregado el middleware de autenticación
     historialMedicoValidations.editarHistorialMedicoValidations[0], // Valida el `param('id_historialmedico')`
     validar,
     obtenerHistorialMedicoPorId
@@ -77,24 +87,29 @@ router.get(
 
 /**
  * @description Ruta para obtener el historial médico de un estudiante específico por su ID de estudiante.
+ * Requiere autenticación JWT: solo usuarios válidos pueden acceder.
  * @method GET
  * @route /historial_medico/estudiante/:id_estudiante
  * @param {string} :id_estudiante - ID único del estudiante cuyo historial médico se desea obtener.
+ * @param {function} authenticateToken - Middleware para verificar el token JWT.
  * @param {function} obtenerHistorialMedicoPorEstudiante - Controlador que maneja la lógica para obtener el historial médico por ID de estudiante.
  */
-router.get('/estudiante/:id_estudiante', obtenerHistorialMedicoPorEstudiante); // Asume que la validación del ID del estudiante se hace en el controlador o no es crítica aquí.
+router.get('/estudiante/:id_estudiante', authenticateToken, obtenerHistorialMedicoPorEstudiante); // Asume que la validación del ID del estudiante se hace en el controlador o no es crítica aquí.
 
 /**
  * @description Ruta para crear un nuevo registro de historial médico.
+ * Requiere autenticación JWT: solo usuarios válidos pueden acceder.
  * Aplica las validaciones definidas en `crearHistorialMedicoValidations` antes de ejecutar el controlador.
  * @method POST
  * @route /historial_medico
+ * @param {function} authenticateToken - Middleware para verificar el token JWT.
  * @param {Array<import('express-validator').ValidationChain>} historialMedicoValidations.crearHistorialMedicoValidations - Middlewares de validación para la creación de historial médico.
  * @param {function} validar - Middleware para manejar los resultados de la validación.
  * @param {function} crearHistorialMedico - Controlador que maneja la lógica de creación de historial médico.
  */
 router.post(
     '/',
+    authenticateToken, // Agregado el middleware de autenticación
     historialMedicoValidations.crearHistorialMedicoValidations,
     validar,
     crearHistorialMedico
@@ -102,16 +117,19 @@ router.post(
 
 /**
  * @description Ruta para editar un historial médico existente por su ID.
+ * Requiere autenticación JWT: solo usuarios válidos pueden acceder.
  * Aplica las validaciones definidas en `editarHistorialMedicoValidations` antes de ejecutar el controlador.
  * @method PUT
  * @route /historial_medico/:id_historialmedico
  * @param {string} :id_historialmedico - ID único del historial médico a editar.
+ * @param {function} authenticateToken - Middleware para verificar el token JWT.
  * @param {Array<import('express-validator').ValidationChain>} historialMedicoValidations.editarHistorialMedicoValidations - Middlewares de validación para la edición de historial médico.
  * @param {function} validar - Middleware para manejar los resultados de la validación.
  * @param {function} editarHistorialMedico - Controlador que maneja la lógica de edición de historial médico.
  */
 router.put(
     '/:id_historialmedico',
+    authenticateToken, // Agregado el middleware de autenticación
     historialMedicoValidations.editarHistorialMedicoValidations,
     validar,
     editarHistorialMedico
@@ -119,16 +137,19 @@ router.put(
 
 /**
  * @description Ruta para eliminar un historial médico del sistema por su ID.
+ * Requiere autenticación JWT: solo usuarios válidos pueden acceder.
  * Aplica validación al parámetro `id_historialmedico`.
  * @method DELETE
  * @route /historial_medico/:id_historialmedico
  * @param {string} :id_historialmedico - ID único del historial médico a eliminar.
+ * @param {function} authenticateToken - Middleware para verificar el token JWT.
  * @param {Array<import('express-validator').ValidationChain>} historialMedicoValidations.editarHistorialMedicoValidations[0] - Middleware de validación para el ID del historial médico.
  * @param {function} validar - Middleware para manejar los resultados de la validación.
  * @param {function} eliminarHistorialMedico - Controlador que maneja la lógica de eliminación de historial médico.
  */
 router.delete(
     '/:id_historialmedico',
+    authenticateToken, // Agregado el middleware de autenticación
     historialMedicoValidations.editarHistorialMedicoValidations[0], // Valida el `param('id_historialmedico')`
     validar,
     eliminarHistorialMedico
