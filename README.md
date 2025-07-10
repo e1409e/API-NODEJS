@@ -47,39 +47,35 @@ API-NODEJS/
 ## ⚙️ Configuración del Entorno
 
 1. **Clona el repositorio:**
-    ```sh
-    git clone [https://github.com/e1409e/API-NODEJS](https://github.com/e1409e/API-NODEJS)
-    cd API-NODEJS
-    ```
+    ```sh
+    git clone https://github.com/e1409e/API-NODEJS
+    cd API-NODEJS
+    ```
 
-2. **Instala las dependencias:**  
-    ```sh
-    npm install
-    ```
+2. **Instala las dependencias:**  
+    ```sh
+    npm install
+    ```
 
 3. **Configura las variables de entorno:**  
     Crea un archivo `.env` en la raíz del proyecto con el siguiente contenido (ejemplo basado en `.env.example`):
 
-    ```env
-    # Selecciona el origen de la base de datos: "neon" o "local"
-    DB_SOURCE=neon
+    ```env
+    Selecciona el origen de tu base de datos, 
+    'neon' o 'local':
+    DB_SOURCE=neon
 
-    # URL de conexión a NeonDB
-    NEON_DATABASE_URL="postgresql://usuario:contraseña@host:puerto/base_de_datos?sslmode=require&channel_binding=require"
-
-    # Parámetros para base de datos local (ejemplo, si usas DB_SOURCE=local)
-    LOCAL_DB_HOST=localhost
-    LOCAL_DB_USER=postgres
-    LOCAL_DB_PASSWORD=root
-    LOCAL_DB_NAME=FLUNIPDIS
-    LOCAL_DB_PORT=5432
-
-    # Puerto de la API
-    PORT=3000
-
-    # Clave secreta para JWT
-    JWT_SECRET=your_jwt_secret_key
-    ```
+    Si es neon usa:
+    NEON_DATABASE_URL=postgresql://usuario:contraseña@host:puerto/base_de_datos? sslmode=require&channel_binding=require
+    
+    Si es local usa:
+    PORT=3000
+    DB_HOST=tu_host
+    DB_USER=tu_usuario
+    DB_PASSWORD=tu_contraseña
+    DB_NAME=nombre_de_la_base_de_datos
+    DB_PORT=puerto_de_la_base_de_datos
+    ```
 
     > ⚠️ **Importante:** Nunca subas tu archivo `.env` a sistemas de control de versiones.
 
