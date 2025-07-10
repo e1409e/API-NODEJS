@@ -9,7 +9,6 @@ Desarrollada con **Node.js** y **Express**, utiliza **PostgreSQL** y un diseño 
 
 ## 📁 Estructura del Proyecto
 
-
 API-NODEJS/
 ├── src/
 │   ├── controllers/      # Lógica de negocio (CRUD)
@@ -25,7 +24,6 @@ API-NODEJS/
 ├── package-lock.json     # Registro exacto de dependencias
 ├── package.json          # Metadatos y scripts del proyecto
 └── README.md             # Documentación del proyecto
-
 
 ---
 
